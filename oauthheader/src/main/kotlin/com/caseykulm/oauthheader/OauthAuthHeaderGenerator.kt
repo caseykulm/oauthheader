@@ -29,12 +29,12 @@ class OauthAuthHeaderGenerator(
 
     fun getAuthHeaderValue(): String {
         return "OAuth " +
-                oauthConsumerKey + "=\"" + consumerKey + "\", " +
-                oauthNonce + "=\"" + nonce + "\", " +
-                oauthSignature + "=\"" + signatureGenerator.getSignatureEncoded() + "\", " +
-                oauthSignatureMethod + "=\"" + oauthSignatureMethodValue + "\", " +
-                oauthTimestamp + "=\"" + timeStamp.toString() + "\", " +
-                oauthAccessToken + "=\"" + accessToken + "\", " +
-                oauthVersion + "=\"" + oauthVersionValue + "\""
+                OAUTH_CONSUMER_KEY + "=\"" + consumerKey + "\", " +
+                OAUTH_NONCE + "=\"" + nonce + "\", " +
+                OAUTH_SIGNATURE + "=\"" + signatureGenerator.getSignatureEncoded() + "\", " +
+                OAUTH_SIGNATURE_METHOD + "=\"" + OAUTH_SIGNATURE_METHOD_VALUE + "\", " +
+                OAUTH_TIMESTAMP + "=\"" + timeStamp.toString() + "\", " +
+                OAUTH_ACCESS_TOKEN + "=\"" + accessToken + "\", " +
+                OAUTH_VERSION + "=\"" + OAUTH_VERSION_VALUE + "\""
     }
 }
