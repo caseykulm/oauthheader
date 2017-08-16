@@ -1,5 +1,8 @@
 package com.caseykulm.oauthheader
 
+import com.caseykulm.oauthheader.header.NonceGenerator
+import com.caseykulm.oauthheader.header.utcTimeStamp
+import com.caseykulm.oauthheader.models.OauthConsumer
 import okhttp3.FormBody
 import okhttp3.Request
 import okio.ByteString
@@ -26,8 +29,8 @@ class SignatureGeneratorTest {
     @Test
     fun getSignatureBaseString() {
         assertEquals(
-                "POST&https%3A%2F%2Fapi.twitter.com%2F1%2Fstatuses%2Fupdate.json&include_entities%3Dtrue%26oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521",
-                siggyGen.getBaseString())
+                "POST&https%3A%2F%2Fapi.twitter.com%2F1%2Fstatuses%2Fupdate.json&include_entities%3Dtrue%26oauth_callback%3Dhttp%3A%2F%2Flocalhost%3A8000%26oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521",
+                siggyGen.getBaseString(getNonceGenerator().generate(), getCalendar().utcTimeStamp()))
     }
 
     @Test
@@ -45,21 +48,18 @@ class SignatureGeneratorTest {
     @Test
     fun getSignatureBaseStringParamsPart() {
         assertEquals(
-                "include_entities%3Dtrue%26oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521",
-                siggyGen.getParamsEncoded())
+                "include_entities%3Dtrue%26oauth_callback%3Dhttp%3A%2F%2Flocalhost%3A8000%26oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521",
+                siggyGen.getParamsEncoded(getNonceGenerator().generate(), getCalendar().utcTimeStamp()))
     }
 
 
     @Test
     fun getSiggy() {
-        assertEquals("tnnArxj06cWHq44gCs1OSKk%2FjLY%3D", siggyGen.getSignatureEncoded())
+
+        assertEquals("lTaBCLo3fPs1RmP5b54e3MivqkA%3D", siggyGen.getSignatureEncoded(getNonceGenerator().generate(), getCalendar().utcTimeStamp()))
     }
 
-    private fun getStubSiggyGen(): SignatureGenerator {
-        val calendar = Calendar.getInstance()
-        // Friday, October 14, 2011 8:09:18 PM
-        calendar.set(2011, 9, 14, 20, 9, 18)
-        val oauthTimeStamp = calendar.utcTimeStamp()
+    private fun getNonceGenerator(): NonceGenerator {
         val random = object : Random() {
             override fun nextBytes(bytes: ByteArray) {
                 if (bytes.size != 32) throw AssertionError()
@@ -68,12 +68,25 @@ class SignatureGeneratorTest {
                 System.arraycopy(nonce, 0, bytes, 0, nonce.size)
             }
         }
-        val oauthNonce = NonceGenerator(random).generate()
+        return NonceGenerator(random)
+    }
+
+    private fun getCalendar(): Calendar {
+        val calendar = Calendar.getInstance()
+        // Friday, October 14, 2011 8:09:18 PM
+        calendar.set(2011, 9, 14, 20, 9, 18)
+        return calendar
+    }
+
+    private fun getStubSiggyGen(): SignatureGenerator {
+        val calendar = getCalendar()
+        val nonceGenerator = getNonceGenerator()
 
         val consumerKey = "xvz1evFS4wEEPTGEFPHBog"
         val consumerSecret = "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw"
         val accessToken = "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb"
         val accessSecret = "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE"
+        val callbackUrl = "http://localhost:8000"
 
         val body = FormBody.Builder()
                 .add("status", "Hello Ladies + Gentlemen, a signed OAuth request!")
@@ -83,7 +96,15 @@ class SignatureGeneratorTest {
                 .post(body)
                 .build()
 
-        val siggyGen = SignatureGenerator(consumerKey, consumerSecret, accessToken, accessSecret, oauthTimeStamp, oauthNonce, resourceReq)
+        val oauthConsumer = OauthConsumer(consumerKey, consumerSecret, callbackUrl)
+
+        val siggyGen = SignatureGenerator(
+                oauthConsumer,
+                accessToken,
+                accessSecret,
+                calendar,
+                nonceGenerator,
+                resourceReq)
         return siggyGen
     }
 }

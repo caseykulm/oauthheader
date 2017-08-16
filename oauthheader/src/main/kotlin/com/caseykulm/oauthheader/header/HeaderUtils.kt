@@ -1,6 +1,6 @@
-package com.caseykulm.oauthheader
+package com.caseykulm.oauthheader.header
 
-import com.google.common.net.UrlEscapers
+import com.caseykulm.oauthheader.models.TokenResponse
 import okhttp3.Request
 import java.util.*
 import kotlin.collections.HashMap
@@ -16,8 +16,6 @@ val OAUTH_CALLBACK = "oauth_callback"
 
 val OAUTH_SIGNATURE_METHOD_VALUE = "HMAC-SHA1"
 val OAUTH_VERSION_VALUE = "1.0"
-
-val ESCAPER = UrlEscapers.urlFormParameterEscaper()
 
 fun Calendar.utcTimeStamp(): Long {
     timeZone = TimeZone.getTimeZone("UTC")

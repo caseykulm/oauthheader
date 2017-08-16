@@ -1,5 +1,8 @@
 package com.caseykulm.oauthheader
 
+import com.caseykulm.oauthheader.header.*
+import com.caseykulm.oauthheader.models.OauthConsumer
+import com.google.common.net.UrlEscapers
 import okhttp3.Request
 import okio.Buffer
 import okio.ByteString
@@ -9,20 +12,27 @@ import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
+val ESCAPER = UrlEscapers.urlFormParameterEscaper()
+
 class SignatureGenerator(
-        val consumerKey: String,
-        val consumerSecret: String,
+        val oauthConsumer: OauthConsumer,
         val accessToken: String,
         val accessSecret: String?,
-        val timeStamp: Long,
-        val nonce: String,
+        val calendar: Calendar,
+        val nonceGenerator: NonceGenerator,
         val resourceRequest: Request) {
-    internal fun getSignatureEncoded(): String {
-        return ESCAPER.escape(getSignature())
+    internal fun getSignatureSnapshotData(): SignatureSnapshotData {
+        val nonce = nonceGenerator.generate()
+        val timeStamp = calendar.utcTimeStamp()
+        return SignatureSnapshotData(timeStamp, nonce, getSignatureEncoded(nonce, timeStamp))
     }
 
-    internal fun getSignature(): String {
-        return getSignature(getSigningKey(), getBaseString())
+    internal fun getSignatureEncoded(nonce: String, timeStamp: Long): String {
+        return ESCAPER.escape(getSignature(nonce, timeStamp))
+    }
+
+    internal fun getSignature(nonce: String, timeStamp: Long): String {
+        return getSignature(getSigningKey(), getBaseString(nonce, timeStamp))
     }
 
     private fun getSignature(signingKey: String, baseString: String): String {
@@ -41,29 +51,30 @@ class SignatureGenerator(
         return ByteString.of(*result).base64()
     }
 
-    internal fun getBaseString(): String {
-        return "${getVerb()}&${getResourcePathEncoded()}&${getParamsEncoded()}"
+    internal fun getBaseString(nonce: String, timeStamp: Long): String {
+        return "${getVerb()}&${getResourcePathEncoded()}&${getParamsEncoded(nonce, timeStamp)}"
     }
 
-    internal fun getParamsEncoded(): String {
+    internal fun getParamsEncoded(nonce: String, timeStamp: Long): String {
         val parameters = TreeMap<String, String>()
-        val paramsWithOauthParams = addOauthParamsEncoded(parameters)
+        val paramsWithOauthParams = addOauthParamsEncoded(parameters, nonce, timeStamp)
         val paramsWithQueryParams = addQueryParamsEncoded(paramsWithOauthParams, resourceRequest)
         val paramsWithFormBodyParams = addFormBodyEncoded(paramsWithQueryParams, resourceRequest)
         return paramsEncodedTreeToString(paramsWithFormBodyParams)
     }
 
     // add in oauth stuff
-    private fun addOauthParamsEncoded(params: TreeMap<String, String>): TreeMap<String, String> {
+    private fun addOauthParamsEncoded(params: TreeMap<String, String>, nonce: String, timeStamp: Long): TreeMap<String, String> {
         val updatedParams = TreeMap<String, String>()
         updatedParams.putAll(params)
 
-        updatedParams.put(OAUTH_CONSUMER_KEY, consumerKey)
+        updatedParams.put(OAUTH_CONSUMER_KEY, oauthConsumer.consumerKey)
         updatedParams.put(OAUTH_ACCESS_TOKEN, accessToken)
         updatedParams.put(OAUTH_NONCE, nonce)
         updatedParams.put(OAUTH_TIMESTAMP, timeStamp.toString())
         updatedParams.put(OAUTH_SIGNATURE_METHOD, OAUTH_SIGNATURE_METHOD_VALUE)
         updatedParams.put(OAUTH_VERSION, OAUTH_VERSION_VALUE)
+        updatedParams.put(OAUTH_CALLBACK, oauthConsumer.callbackUrl)
 
         return updatedParams
     }
@@ -136,7 +147,7 @@ class SignatureGenerator(
      * For example, if your client secret is abcd and your token secret is 1234, the key is abcd&1234. If your client secret is abcd, and you don't have a token yet, the key is abcd&.
      */
     internal fun getSigningKey(): String {
-        val escapedConsumerSecret = ESCAPER.escape(consumerSecret)
+        val escapedConsumerSecret = ESCAPER.escape(oauthConsumer.consumerSecret)
         val signingAccessSecret = if (accessSecret == null) "" else accessSecret
         val escapedAccessSigningSecret = ESCAPER.escape(signingAccessSecret)
         return "${escapedConsumerSecret}&${escapedAccessSigningSecret}"
@@ -150,3 +161,5 @@ class SignatureGenerator(
         return resourceRequest.method()
     }
 }
+
+data class SignatureSnapshotData(val timeStamp: Long, val nonce: String, val signatureEncoded: String)

@@ -1,5 +1,8 @@
 package com.caseykulm.oauthheader
 
+import com.caseykulm.oauthheader.header.OauthAuthHeaderGenerator
+import com.caseykulm.oauthheader.header.toTokenResponse
+import com.caseykulm.oauthheader.models.OauthConsumer
 import okhttp3.*
 import org.junit.Before
 import org.junit.Test
@@ -18,11 +21,12 @@ class TwitterOauthTest {
     @Test
     fun getUserProfile() {
         val request = Request.Builder()
-                .url(requestTokenUrl)
+                .url(accessTokenUrl)
                 .post(FormBody.Builder().build())
                 .build()
-        val consumerKey = "YOUR_CONSUMER_KEY"
-        val consumerSecret = "YOUR_CONSUMER_SECRET"
+        val consumerKey = "YOUR_KEY"
+        val consumerSecret = "YOUR_SECRET"
+        val callbackUrl = "http://127.0.0.1:8000/"
 
         if (consumerKey.startsWith("YOUR_") || consumerSecret.startsWith("YOUR_")) {
             print("Add your key and secret to get started")
@@ -31,15 +35,17 @@ class TwitterOauthTest {
 
         val accessToken = ""
         val accessSecret = ""
+        val oauthConsumer = OauthConsumer(consumerKey, consumerSecret, callbackUrl)
         val oauthHeaderGenerator = OauthAuthHeaderGenerator(
-                consumerKey,
-                consumerSecret,
+                oauthConsumer,
                 accessToken,
                 accessSecret,
                 request)
         val oauthRequestHeader = Headers.Builder()
                 .add(OauthAuthHeaderGenerator.authHeaderKey, oauthHeaderGenerator.getAuthHeaderValue())
         val requestTokenRequest = request.newBuilder()
+                .url(accessTokenUrl)
+                .post(FormBody.Builder().build())
                 .headers(oauthRequestHeader.build())
                 .build()
 
@@ -47,6 +53,7 @@ class TwitterOauthTest {
         val responseBody = response.body()
         if (responseBody == null) throw IllegalStateException("Response body is null")
         val bodyString = responseBody.string()
+        println(bodyString)
         val tokenResponse = toTokenResponse(bodyString)
         println(tokenResponse)
 
@@ -54,7 +61,7 @@ class TwitterOauthTest {
         if (authorizeUrlBuilder == null) throw IllegalStateException("authorize url is null")
         authorizeUrlBuilder
                 .addQueryParameter("oauth_token", tokenResponse.oauthToken)
-                .addQueryParameter("oauth_callback", "oob")
+                .addQueryParameter("oauth_callback", "http://localhost:8000")
         val authorizeUrl = authorizeUrlBuilder.build()
         println(authorizeUrl)
     }

@@ -1,4 +1,4 @@
-package com.caseykulm.oauthheader
+package com.caseykulm.oauthheader.models
 
 data class TokenResponse(
         val oauthToken: String,

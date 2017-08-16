@@ -1,4 +1,4 @@
-package com.caseykulm.oauthheader
+package com.caseykulm.oauthheader.header
 
 import okio.ByteString
 import java.util.*

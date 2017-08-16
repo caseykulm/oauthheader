@@ -1,5 +1,7 @@
 package com.caseykulm.oauthheader
 
+import com.caseykulm.oauthheader.header.NonceGenerator
+import com.caseykulm.oauthheader.header.utcTimeStamp
 import okio.ByteString
 import org.junit.Assert.assertEquals
 import org.junit.Test

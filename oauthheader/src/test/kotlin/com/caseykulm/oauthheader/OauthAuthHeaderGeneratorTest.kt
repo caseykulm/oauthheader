@@ -1,5 +1,7 @@
 package com.caseykulm.oauthheader
 
+import com.caseykulm.oauthheader.header.OauthAuthHeaderGenerator
+import com.caseykulm.oauthheader.models.OauthConsumer
 import okhttp3.FormBody
 import okhttp3.Request
 import okio.ByteString
@@ -38,9 +40,12 @@ class OauthAuthHeaderGeneratorTest {
             }
         }
 
+        val callbackUrl = "cburl"
+
+        val oauthConsumer = OauthConsumer(consumerKey, consumerSecret, callbackUrl)
+
         oauthAuthHeaderGenerator = OauthAuthHeaderGenerator(
-                consumerKey,
-                consumerSecret,
+                oauthConsumer,
                 accessToken,
                 accessSecret,
                 resourceReq,
@@ -53,11 +58,12 @@ class OauthAuthHeaderGeneratorTest {
         Assert.assertEquals("OAuth "
                 + "oauth_consumer_key=\"xvz1evFS4wEEPTGEFPHBog\", "
                 + "oauth_nonce=\"kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg\", "
-                + "oauth_signature=\"tnnArxj06cWHq44gCs1OSKk%2FjLY%3D\", "
+                + "oauth_signature=\"V1dSRURmBtEvZbBJJDXHXLkbnd8%3D\", "
                 + "oauth_signature_method=\"HMAC-SHA1\", "
                 + "oauth_timestamp=\"1318622958\", "
                 + "oauth_token=\"370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb\", "
-                + "oauth_version=\"1.0\"",
+                + "oauth_version=\"1.0\", "
+                + "oauth_callback=\"cburl\"",
                 oauthAuthHeaderGenerator.getAuthHeaderValue())
     }
 }
