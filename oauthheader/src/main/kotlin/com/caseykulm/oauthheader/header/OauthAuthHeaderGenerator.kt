@@ -1,6 +1,5 @@
 package com.caseykulm.oauthheader.header
 
-import com.caseykulm.oauthheader.SignatureGenerator
 import com.caseykulm.oauthheader.models.OauthConsumer
 import okhttp3.Request
 import java.security.SecureRandom

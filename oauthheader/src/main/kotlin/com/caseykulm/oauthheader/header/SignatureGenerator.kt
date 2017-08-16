@@ -1,6 +1,5 @@
-package com.caseykulm.oauthheader
+package com.caseykulm.oauthheader.header
 
-import com.caseykulm.oauthheader.header.*
 import com.caseykulm.oauthheader.models.OauthConsumer
 import com.google.common.net.UrlEscapers
 import okhttp3.Request

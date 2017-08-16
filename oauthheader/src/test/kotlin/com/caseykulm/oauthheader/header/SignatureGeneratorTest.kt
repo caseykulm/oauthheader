@@ -1,6 +1,7 @@
-package com.caseykulm.oauthheader
+package com.caseykulm.oauthheader.header
 
 import com.caseykulm.oauthheader.header.NonceGenerator
+import com.caseykulm.oauthheader.header.SignatureGenerator
 import com.caseykulm.oauthheader.header.utcTimeStamp
 import com.caseykulm.oauthheader.models.OauthConsumer
 import okhttp3.FormBody
