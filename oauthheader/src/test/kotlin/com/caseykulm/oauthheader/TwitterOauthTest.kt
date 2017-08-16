@@ -39,10 +39,9 @@ class TwitterOauthTest {
         val oauthHeaderGenerator = OauthAuthHeaderGenerator(
                 oauthConsumer,
                 accessToken,
-                accessSecret,
-                request)
+                accessSecret)
         val oauthRequestHeader = Headers.Builder()
-                .add(OauthAuthHeaderGenerator.authHeaderKey, oauthHeaderGenerator.getAuthHeaderValue())
+                .add(OauthAuthHeaderGenerator.authHeaderKey, oauthHeaderGenerator.getAuthHeaderValue(request))
         val requestTokenRequest = request.newBuilder()
                 .url(accessTokenUrl)
                 .post(FormBody.Builder().build())

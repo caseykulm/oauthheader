@@ -20,14 +20,6 @@ class OauthAuthHeaderGeneratorTest {
         val accessToken = "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb"
         val accessSecret = "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE"
 
-        val body = FormBody.Builder()
-                .add("status", "Hello Ladies + Gentlemen, a signed OAuth request!")
-                .build()
-        val resourceReq = Request.Builder()
-                .url("https://api.twitter.com/1/statuses/update.json?include_entities=true")
-                .post(body)
-                .build()
-
         val calendar = Calendar.getInstance()
         // Friday, October 14, 2011 8:09:18 PM
         calendar.set(2011, 9, 14, 20, 9, 18)
@@ -48,13 +40,20 @@ class OauthAuthHeaderGeneratorTest {
                 oauthConsumer,
                 accessToken,
                 accessSecret,
-                resourceReq,
                 random,
                 calendar)
     }
 
     @Test
     fun getAuthHeaderTest() {
+        val body = FormBody.Builder()
+                .add("status", "Hello Ladies + Gentlemen, a signed OAuth request!")
+                .build()
+        val resourceReq = Request.Builder()
+                .url("https://api.twitter.com/1/statuses/update.json?include_entities=true")
+                .post(body)
+                .build()
+
         Assert.assertEquals("OAuth "
                 + "oauth_consumer_key=\"xvz1evFS4wEEPTGEFPHBog\", "
                 + "oauth_nonce=\"kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg\", "
@@ -64,6 +63,6 @@ class OauthAuthHeaderGeneratorTest {
                 + "oauth_token=\"370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb\", "
                 + "oauth_version=\"1.0\", "
                 + "oauth_callback=\"cburl\"",
-                oauthAuthHeaderGenerator.getAuthHeaderValue())
+                oauthAuthHeaderGenerator.getAuthHeaderValue(resourceReq))
     }
 }

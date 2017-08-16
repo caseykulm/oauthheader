@@ -9,7 +9,6 @@ class OauthAuthHeaderGenerator(
         val oauthConsumer: OauthConsumer,
         val accessToken: String,
         accessSecret: String?,
-        request: Request,
         random: Random = SecureRandom(),
         calendar: Calendar = Calendar.getInstance()) {
     val nonceGenerator = NonceGenerator(random)
@@ -18,15 +17,14 @@ class OauthAuthHeaderGenerator(
             accessToken,
             accessSecret,
             calendar,
-            nonceGenerator,
-            request)
+            nonceGenerator)
 
     companion object {
         val authHeaderKey = "Authorization"
     }
 
-    fun getAuthHeaderValue(): String {
-        val signatureSnapshotData = signatureGenerator.getSignatureSnapshotData()
+    fun getAuthHeaderValue(request: Request): String {
+        val signatureSnapshotData = signatureGenerator.getSignatureSnapshotData(request)
         return StringBuilder("OAuth ")
                 .append(OAUTH_CONSUMER_KEY).append("""="${oauthConsumer.consumerKey}", """)
                 .append(OAUTH_NONCE).append("""="${signatureSnapshotData.nonce}", """)
