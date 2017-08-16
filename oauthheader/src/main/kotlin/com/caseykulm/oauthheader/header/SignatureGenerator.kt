@@ -18,20 +18,19 @@ class SignatureGenerator(
         val accessToken: String,
         val accessSecret: String?,
         val calendar: Calendar,
-        val nonceGenerator: NonceGenerator,
-        val resourceRequest: Request) {
-    internal fun getSignatureSnapshotData(): SignatureSnapshotData {
+        val nonceGenerator: NonceGenerator) {
+    internal fun getSignatureSnapshotData(request: Request): SignatureSnapshotData {
         val nonce = nonceGenerator.generate()
         val timeStamp = calendar.utcTimeStamp()
-        return SignatureSnapshotData(timeStamp, nonce, getSignatureEncoded(nonce, timeStamp))
+        return SignatureSnapshotData(timeStamp, nonce, getSignatureEncoded(nonce, timeStamp, request))
     }
 
-    internal fun getSignatureEncoded(nonce: String, timeStamp: Long): String {
-        return ESCAPER.escape(getSignature(nonce, timeStamp))
+    internal fun getSignatureEncoded(nonce: String, timeStamp: Long, request: Request): String {
+        return ESCAPER.escape(getSignature(nonce, timeStamp, request))
     }
 
-    internal fun getSignature(nonce: String, timeStamp: Long): String {
-        return getSignature(getSigningKey(), getBaseString(nonce, timeStamp))
+    internal fun getSignature(nonce: String, timeStamp: Long, request: Request): String {
+        return getSignature(getSigningKey(), getBaseString(nonce, timeStamp, request))
     }
 
     private fun getSignature(signingKey: String, baseString: String): String {
@@ -50,15 +49,15 @@ class SignatureGenerator(
         return ByteString.of(*result).base64()
     }
 
-    internal fun getBaseString(nonce: String, timeStamp: Long): String {
-        return "${getVerb()}&${getResourcePathEncoded()}&${getParamsEncoded(nonce, timeStamp)}"
+    internal fun getBaseString(nonce: String, timeStamp: Long, request: Request): String {
+        return "${getVerb(request)}&${getResourcePathEncoded(request)}&${getParamsEncoded(nonce, timeStamp, request)}"
     }
 
-    internal fun getParamsEncoded(nonce: String, timeStamp: Long): String {
+    internal fun getParamsEncoded(nonce: String, timeStamp: Long, request: Request): String {
         val parameters = TreeMap<String, String>()
         val paramsWithOauthParams = addOauthParamsEncoded(parameters, nonce, timeStamp)
-        val paramsWithQueryParams = addQueryParamsEncoded(paramsWithOauthParams, resourceRequest)
-        val paramsWithFormBodyParams = addFormBodyEncoded(paramsWithQueryParams, resourceRequest)
+        val paramsWithQueryParams = addQueryParamsEncoded(paramsWithOauthParams, request)
+        val paramsWithFormBodyParams = addFormBodyEncoded(paramsWithQueryParams, request)
         return paramsEncodedTreeToString(paramsWithFormBodyParams)
     }
 
@@ -152,12 +151,12 @@ class SignatureGenerator(
         return "${escapedConsumerSecret}&${escapedAccessSigningSecret}"
     }
 
-    internal fun getResourcePathEncoded(): String {
-        return ESCAPER.escape(resourceRequest.urlToPath())
+    internal fun getResourcePathEncoded(request: Request): String {
+        return ESCAPER.escape(request.urlToPath())
     }
 
-    internal fun getVerb(): String {
-        return resourceRequest.method()
+    internal fun getVerb(request: Request): String {
+        return request.method()
     }
 }
 

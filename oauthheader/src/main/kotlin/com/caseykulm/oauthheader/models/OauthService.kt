@@ -1,7 +1,6 @@
 package com.caseykulm.oauthheader.models
 
-interface OauthService {
-    fun getRequestTokenUrl(): String
-    fun getAuthorizeUrl(): String
-    fun getAccessTokenUrl(): String
-}
+data class OauthService(
+        val requestTokenUrl: String,
+        val authorizeUrl: String,
+        val accessTokenUrl: String)
