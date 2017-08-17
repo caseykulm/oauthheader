@@ -21,7 +21,7 @@ val oauthConsumer = OauthConsumer(
   "YOUR_CONSUMER_CALLBACK")
 ```
 
-Define the 3 OAuth endpoints from the Service, or use on of the predefined 
+Define the 3 OAuth endpoints from the Service, or use one of the predefined 
 OauthService objects from the oauthheader-services artifact.
 
 ```kotlin
