@@ -10,29 +10,48 @@ An OkHttp helper for generating the three bits needed for 3 legged OAuth.
 
 ### Step 0: Define your OAuth constants
 
-Define the key and secret generated for your app, by the Service.
+Define the key and secret generated for your app by the Service. Also 
+define the callback URL you would like the Service to send the Request 
+Token to.
 
 ```kotlin
-val consumerKey = "YOUR_CONSUMER_KEY"
-val consumerSecret = "YOUR_CONSUMER_SECRET"
+val oauthConsumer = OauthConsumer(
+  "YOUR_CONSUMER_KEY", 
+  "YOUR_CONSUMER_SECRET", 
+  "YOUR_CONSUMER_CALLBACK")
 ```
 
-Define the 3 OAuth endpoints from the Service.
+Define the 3 OAuth endpoints from the Service, or use on of the predefined 
+OauthService objects from the oauthheader-services artifact.
 
 ```kotlin
-val requestTokenUrl = "https://api.twitter.com/oauth/request_token"
-val authorizeUrl = "https://api.twitter.com/oauth/authorize"
-val accessTokenUrl = "https://api.twitter.com/oauth/access_token"
+val oauthService = OauthService(
+  "SERVICE_REQUEST_TOKEN_URL", 
+  "SERVICE_AUTHORIZE_URL", 
+  "SERVICE_ACCESS_TOKEN_URL")
 ```
 
-### Step 1: Getting Request Token
-
-Access Token and Access Secret Empty for this step since we 
-haven't fetched any tokens yet.
+Create an Oauth1Api instance with the Oauth1Client class.
 
 ```kotlin
-val accessToken = ""
-val accessSecret = ""
+val oauthClient = Oauth1Client(
+  oauthConsumer, 
+  oauthService, 
+  okhttpClient)
+```
+
+### Step 1: Get a formatted Authorization URL
+
+```kotlin
+val authorizationUrl = oauthClient.getAuthorizationUrl()
+```
+
+### Step 3: Getting Request Token
+
+Create an AccessTokenResponse object.
+
+```kotlin
+val accessTokenResponse = AccessTokenResponse("CONSUMER_ACCESS_TOKEN", "CONSUMER_VERIFIER")
 ```
 
 Your request for a resource on Service, that will require OAuth.
