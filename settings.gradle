@@ -1,3 +1,4 @@
 rootProject.name = 'oauthheader-parent'
 include 'oauthheader'
+include 'oauthheader-services'
 

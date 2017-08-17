@@ -56,7 +56,6 @@ class SignatureGeneratorTest {
 
     @Test
     fun getSiggy() {
-
         assertEquals("lTaBCLo3fPs1RmP5b54e3MivqkA%3D", siggyGen.getSignatureEncoded(getNonceGenerator().generate(), getCalendar().utcTimeStamp(), getResourceRequest()))
     }
 

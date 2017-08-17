@@ -30,6 +30,12 @@ fun Request.urlToPath(): String {
 }
 
 fun toTokenResponse(responseStr: String): TokenResponse {
+    if (!responseStr.contains("oauth_token")) {
+        throw IllegalStateException("oauth_token cannot be parsed from: " + responseStr)
+    } else if (!responseStr.contains("oauth_token_secret")) {
+        throw IllegalStateException("oauth_token_secret cannot be parsed from: " + responseStr)
+    }
+
     val values = responseStr.split("&")
     val valueMap = HashMap<String, String>()
     values.forEach {
