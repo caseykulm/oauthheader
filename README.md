@@ -2,9 +2,9 @@
 
 An OkHttp helper for generating the three bits needed for 3 legged OAuth. 
 
-1. Request Token Request building
-2. Authorize URL building
-3. Access Token Request building
+1. Request Token
+2. Authorize
+3. Access Token
 
 ## Example
 
