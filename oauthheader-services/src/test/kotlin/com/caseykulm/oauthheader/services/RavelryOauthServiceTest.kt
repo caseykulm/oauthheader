@@ -9,8 +9,8 @@ import org.junit.Test
 
 class RavelryOauthServiceTest {
     val oauthConsumer = OauthConsumer(
-            "YOUR_TWITTER_CONSUMER_KEY",
-            "YOUR_TWITTER_CONSUMER_SECRET",
+            "YOUR_RAVELRY_CONSUMER_KEY",
+            "YOUR_RAVELRY_CONSUMER_SECRET",
             "YOUR_CALLBACK")
     val oauthService = RavelryOauthService()
     val okhttpClient = OkHttpClient.Builder().build()

@@ -15,7 +15,7 @@ val ESCAPER = UrlEscapers.urlFormParameterEscaper()
 
 class SignatureGenerator(
         val oauthConsumer: OauthConsumer,
-        val accessToken: String,
+        val accessToken: String?,
         val accessSecret: String?,
         val calendar: Calendar,
         val nonceGenerator: NonceGenerator) {
@@ -67,7 +67,9 @@ class SignatureGenerator(
         updatedParams.putAll(params)
 
         updatedParams.put(OAUTH_CONSUMER_KEY, oauthConsumer.consumerKey)
-        updatedParams.put(OAUTH_ACCESS_TOKEN, accessToken)
+        if (accessToken?.isEmpty() == false) {
+            updatedParams.put(OAUTH_ACCESS_TOKEN, accessToken)
+        }
         updatedParams.put(OAUTH_NONCE, nonce)
         updatedParams.put(OAUTH_TIMESTAMP, timeStamp.toString())
         updatedParams.put(OAUTH_SIGNATURE_METHOD, OAUTH_SIGNATURE_METHOD_VALUE)

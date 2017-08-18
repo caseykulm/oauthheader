@@ -7,7 +7,7 @@ import java.util.*
 
 class OauthAuthHeaderGenerator(
         val oauthConsumer: OauthConsumer,
-        val accessToken: String,
+        val accessToken: String?,
         accessSecret: String?,
         random: Random = SecureRandom(),
         calendar: Calendar = Calendar.getInstance()) {
@@ -25,15 +25,18 @@ class OauthAuthHeaderGenerator(
 
     fun getAuthHeaderValue(request: Request): String {
         val signatureSnapshotData = signatureGenerator.getSignatureSnapshotData(request)
-        return StringBuilder("OAuth ")
+        val strBuilder = StringBuilder("OAuth ")
                 .append(OAUTH_CONSUMER_KEY).append("""="${oauthConsumer.consumerKey}", """)
                 .append(OAUTH_NONCE).append("""="${signatureSnapshotData.nonce}", """)
                 .append(OAUTH_SIGNATURE).append("""="${signatureSnapshotData.signatureEncoded}", """)
                 .append(OAUTH_SIGNATURE_METHOD).append("""="${OAUTH_SIGNATURE_METHOD_VALUE}", """)
                 .append(OAUTH_TIMESTAMP).append("""="${signatureSnapshotData.timeStamp.toString()}", """)
-                .append(OAUTH_ACCESS_TOKEN).append("""="${accessToken}", """)
-                .append(OAUTH_VERSION).append("""="${OAUTH_VERSION_VALUE}", """)
+        if (accessToken?.isEmpty() == false) {
+            strBuilder.append(OAUTH_ACCESS_TOKEN).append("""="${accessToken}", """)
+        }
+        strBuilder.append(OAUTH_VERSION).append("""="${OAUTH_VERSION_VALUE}", """)
                 .append(OAUTH_CALLBACK).append("""="${oauthConsumer.callbackUrl}"""")
                 .toString()
+        return strBuilder.toString()
     }
 }
