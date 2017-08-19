@@ -35,7 +35,7 @@ class OauthAuthHeaderGenerator(
             strBuilder.append(OAUTH_ACCESS_TOKEN).append("""="${accessToken}", """)
         }
         strBuilder.append(OAUTH_VERSION).append("""="${OAUTH_VERSION_VALUE}", """)
-                .append(OAUTH_CALLBACK).append("""="${oauthConsumer.callbackUrl}"""")
+                .append(OAUTH_CALLBACK).append("""="${ESCAPER.escape(oauthConsumer.callbackUrl)}"""")
                 .toString()
         return strBuilder.toString()
     }

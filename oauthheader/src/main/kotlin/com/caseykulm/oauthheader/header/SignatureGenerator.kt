@@ -74,7 +74,7 @@ class SignatureGenerator(
         updatedParams.put(OAUTH_TIMESTAMP, timeStamp.toString())
         updatedParams.put(OAUTH_SIGNATURE_METHOD, OAUTH_SIGNATURE_METHOD_VALUE)
         updatedParams.put(OAUTH_VERSION, OAUTH_VERSION_VALUE)
-        updatedParams.put(OAUTH_CALLBACK, oauthConsumer.callbackUrl)
+        updatedParams.put(OAUTH_CALLBACK, ESCAPER.escape(oauthConsumer.callbackUrl))
 
         return updatedParams
     }

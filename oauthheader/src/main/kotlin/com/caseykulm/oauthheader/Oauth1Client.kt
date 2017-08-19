@@ -26,8 +26,10 @@ class Oauth1Client(
                 oauthConsumer,
                 "",
                 "")
+        val requestAuthHeaderValue = oauthHeaderGenerator.getAuthHeaderValue(requestTokenOkRequest)
+        println("Request Header - Authentication: ${requestAuthHeaderValue}")
         val requestTokenRequestAuthed = requestTokenOkRequest.newBuilder()
-                .header(OauthAuthHeaderGenerator.authHeaderKey, oauthHeaderGenerator.getAuthHeaderValue(requestTokenOkRequest))
+                .header(OauthAuthHeaderGenerator.authHeaderKey, requestAuthHeaderValue)
                 .build()
         val requestTokenOkResponse = okHttpClient.newCall(requestTokenRequestAuthed).execute()
         val requestTokenResponseBody = requestTokenOkResponse.body()
