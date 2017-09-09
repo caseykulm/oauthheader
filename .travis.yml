@@ -1,5 +1,7 @@
 language: java
 
+sudo: false
+
 script: ./gradlew clean check
 
 before_cache:
