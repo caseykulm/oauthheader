@@ -12,13 +12,13 @@ import java.util.*
 
 class OauthAuthHeaderGeneratorTest {
     lateinit var oauthAuthHeaderGenerator: OauthAuthHeaderGenerator
+    val accessToken = "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb"
+    val accessSecret = "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE"
 
     @Before
     fun setup() {
         val consumerKey = "xvz1evFS4wEEPTGEFPHBog"
         val consumerSecret = "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw"
-        val accessToken = "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb"
-        val accessSecret = "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE"
 
         val calendar = Calendar.getInstance()
         // Friday, October 14, 2011 8:09:18 PM
@@ -38,8 +38,6 @@ class OauthAuthHeaderGeneratorTest {
 
         oauthAuthHeaderGenerator = OauthAuthHeaderGenerator(
                 oauthConsumer,
-                accessToken,
-                accessSecret,
                 random,
                 calendar)
     }
@@ -57,12 +55,11 @@ class OauthAuthHeaderGeneratorTest {
         Assert.assertEquals("OAuth "
                 + "oauth_consumer_key=\"xvz1evFS4wEEPTGEFPHBog\", "
                 + "oauth_nonce=\"kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg\", "
-                + "oauth_signature=\"V1dSRURmBtEvZbBJJDXHXLkbnd8%3D\", "
+                + "oauth_signature=\"tnnArxj06cWHq44gCs1OSKk%2FjLY%3D\", "
                 + "oauth_signature_method=\"HMAC-SHA1\", "
                 + "oauth_timestamp=\"1318622958\", "
                 + "oauth_token=\"370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb\", "
-                + "oauth_version=\"1.0\", "
-                + "oauth_callback=\"cburl\"",
-                oauthAuthHeaderGenerator.getAuthHeaderValue(resourceReq))
+                + "oauth_version=\"1.0\"",
+                oauthAuthHeaderGenerator.getResourceAuthHeaderValue(resourceReq, accessToken, accessSecret))
     }
 }

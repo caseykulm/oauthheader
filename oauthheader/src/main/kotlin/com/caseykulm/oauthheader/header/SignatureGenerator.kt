@@ -1,6 +1,7 @@
 package com.caseykulm.oauthheader.header
 
 import com.caseykulm.oauthheader.models.OauthConsumer
+import com.caseykulm.oauthheader.models.OauthStage
 import com.google.common.net.UrlEscapers
 import okhttp3.Request
 import okio.Buffer
@@ -15,22 +16,20 @@ val ESCAPER = UrlEscapers.urlFormParameterEscaper()
 
 class SignatureGenerator(
         val oauthConsumer: OauthConsumer,
-        val accessToken: String?,
-        val accessSecret: String?,
         val calendar: Calendar,
         val nonceGenerator: NonceGenerator) {
-    internal fun getSignatureSnapshotData(request: Request): SignatureSnapshotData {
+    internal fun getSignatureSnapshotData(request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = ""): SignatureSnapshotData {
         val nonce = nonceGenerator.generate()
         val timeStamp = calendar.utcTimeStamp()
-        return SignatureSnapshotData(timeStamp, nonce, getSignatureEncoded(nonce, timeStamp, request))
+        return SignatureSnapshotData(timeStamp, nonce, getSignatureEncoded(nonce, timeStamp, request, oauthStage, token, tokenSecret))
     }
 
-    internal fun getSignatureEncoded(nonce: String, timeStamp: Long, request: Request): String {
-        return ESCAPER.escape(getSignature(nonce, timeStamp, request))
+    internal fun getSignatureEncoded(nonce: String, timeStamp: Long, request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = ""): String {
+        return ESCAPER.escape(getSignature(nonce, timeStamp, request, oauthStage, token, tokenSecret))
     }
 
-    internal fun getSignature(nonce: String, timeStamp: Long, request: Request): String {
-        return getSignature(getSigningKey(), getBaseString(nonce, timeStamp, request))
+    internal fun getSignature(nonce: String, timeStamp: Long, request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = ""): String {
+        return getSignature(getSigningKey(oauthStage, tokenSecret), getBaseString(nonce, timeStamp, request, oauthStage, token))
     }
 
     private fun getSignature(signingKey: String, baseString: String): String {
@@ -49,38 +48,67 @@ class SignatureGenerator(
         return ByteString.of(*result).base64()
     }
 
-    internal fun getBaseString(nonce: String, timeStamp: Long, request: Request): String {
-        return "${getVerb(request)}&${getResourcePathEncoded(request)}&${getParamsEncoded(nonce, timeStamp, request)}"
+    internal fun getBaseString(
+        nonce: String,
+        timeStamp: Long,
+        request: Request,
+        oauthStage: OauthStage,
+        token: String = ""): String {
+        return "${getVerb(request)}&${getResourcePathEncoded(request)}&${getParamsEncodedString(nonce, timeStamp, request, oauthStage, token)}"
     }
 
-    internal fun getParamsEncoded(nonce: String, timeStamp: Long, request: Request): String {
-        val parameters = TreeMap<String, String>()
-        val paramsWithOauthParams = addOauthParamsEncoded(parameters, nonce, timeStamp)
-        val paramsWithQueryParams = addQueryParamsEncoded(paramsWithOauthParams, request)
-        val paramsWithFormBodyParams = addFormBodyEncoded(paramsWithQueryParams, request)
-        return paramsEncodedTreeToString(paramsWithFormBodyParams)
+    internal fun getParamsEncodedString(
+        nonce: String,
+        timeStamp: Long,
+        request: Request,
+        oauthStage: OauthStage,
+        token: String = ""): String {
+        val paramsEncodedTree = getParamsEncoded(nonce, timeStamp, request, oauthStage, token)
+        return paramsEncodedTreeToString(paramsEncodedTree)
+    }
+
+    internal fun getParamsEncoded(
+        nonce: String,
+        timeStamp: Long,
+        request: Request,
+        oauthStage: OauthStage,
+        token: String = ""): TreeMap<String, String> {
+        return addFormBodyEncoded(
+                request, addQueryParamsEncoded(
+                    request, addOauthParamsEncoded(
+                        nonce, timeStamp, oauthStage, token, TreeMap()
+                    )
+                )
+        )
     }
 
     // add in oauth stuff
-    private fun addOauthParamsEncoded(params: TreeMap<String, String>, nonce: String, timeStamp: Long): TreeMap<String, String> {
+    private fun addOauthParamsEncoded(
+        nonce: String,
+        timeStamp: Long,
+        oauthStage: OauthStage,
+        token: String = "",
+        params: TreeMap<String, String>): TreeMap<String, String> {
         val updatedParams = TreeMap<String, String>()
         updatedParams.putAll(params)
-
         updatedParams.put(OAUTH_CONSUMER_KEY, oauthConsumer.consumerKey)
-        if (accessToken?.isEmpty() == false) {
-            updatedParams.put(OAUTH_ACCESS_TOKEN, accessToken)
+        if (oauthStage == OauthStage.GET_ACCESS_TOKEN || oauthStage == OauthStage.GET_RESOURCE) {
+            updatedParams.put(OAUTH_TOKEN, token)
         }
         updatedParams.put(OAUTH_NONCE, nonce)
         updatedParams.put(OAUTH_TIMESTAMP, timeStamp.toString())
         updatedParams.put(OAUTH_SIGNATURE_METHOD, OAUTH_SIGNATURE_METHOD_VALUE)
         updatedParams.put(OAUTH_VERSION, OAUTH_VERSION_VALUE)
-        updatedParams.put(OAUTH_CALLBACK, ESCAPER.escape(oauthConsumer.callbackUrl))
-
+        if (oauthStage == OauthStage.GET_REQUEST_TOKEN) {
+          updatedParams.put(OAUTH_CALLBACK, ESCAPER.escape(oauthConsumer.callbackUrl))
+        }
         return updatedParams
     }
 
     // add in query param stuff
-    private fun addQueryParamsEncoded(params: TreeMap<String, String>, resourceRequest: Request): TreeMap<String, String> {
+    private fun addQueryParamsEncoded(
+        resourceRequest: Request,
+        params: TreeMap<String, String>): TreeMap<String, String> {
         val updatedParams = TreeMap<String, String>()
         updatedParams.putAll(params)
 
@@ -94,7 +122,9 @@ class SignatureGenerator(
     }
 
     // add in form body stuff
-    private fun addFormBodyEncoded(params: TreeMap<String, String>, resourceRequest: Request): TreeMap<String, String> {
+    private fun addFormBodyEncoded(
+        resourceRequest: Request,
+        params: TreeMap<String, String>): TreeMap<String, String> {
         val updatedParams = TreeMap<String, String>()
         updatedParams.putAll(params)
 
@@ -146,9 +176,14 @@ class SignatureGenerator(
      *
      * For example, if your client secret is abcd and your token secret is 1234, the key is abcd&1234. If your client secret is abcd, and you don't have a token yet, the key is abcd&.
      */
-    internal fun getSigningKey(): String {
+    internal fun getSigningKey(oauthStage: OauthStage, tokenSecret: String = ""): String {
         val escapedConsumerSecret = ESCAPER.escape(oauthConsumer.consumerSecret)
-        val signingAccessSecret = if (accessSecret == null) "" else accessSecret
+        val signingAccessSecret: String
+        if (oauthStage == OauthStage.GET_ACCESS_TOKEN|| oauthStage == OauthStage.GET_RESOURCE) {
+            signingAccessSecret = tokenSecret
+        } else {
+            signingAccessSecret = ""
+        }
         val escapedAccessSigningSecret = ESCAPER.escape(signingAccessSecret)
         return "${escapedConsumerSecret}&${escapedAccessSigningSecret}"
     }

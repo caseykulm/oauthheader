@@ -1,5 +1,5 @@
 group 'com.caseykulm.oauthheader'
-version '0.1.2-SNAPSHOT'
+version '0.1.5-SNAPSHOT'
 
 buildscript {
     ext.kotlin_version = '1.1.4'
@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 
     compile project(":oauthheader")
 
@@ -29,8 +29,8 @@ dependencies {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "1.6"
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "1.6"
 }

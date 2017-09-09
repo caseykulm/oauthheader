@@ -9,22 +9,23 @@ import org.junit.Rule
 import org.junit.Test
 
 class RavelryOauthServiceTest {
-    val oauthConsumer = OauthConsumer(
-            "YOUR_RAVELRY_CONSUMER_KEY",
-            "YOUR_RAVELRY_CONSUMER_SECRET",
-            "YOUR_CALLBACK")
-    @Rule @JvmField val oauthConsumerRule = OauthConsumerSetRule(oauthConsumer)
-    val oauthService = RavelryOauthService()
-    val okhttpClient = OkHttpClient.Builder().build()
-    lateinit var oauthClient: Oauth1Api
+  val oauthConsumer = OauthConsumer(
+      "YOUR_RAVELRY_CONSUMER_KEY",
+      "YOUR_RAVELRY_CONSUMER_SECRET",
+      "YOUR_CALLBACK")
+  // @Rule @JvmField val oauthConsumerRule = OauthConsumerSetRule(oauthConsumer)
+  val oauthService = RavelryOauthService()
+  val okhttpClient = OkHttpClient.Builder().build()
+  lateinit var oauthClient: Oauth1Api
 
-    @Before
-    fun setUp() {
-        oauthClient = Oauth1Client(oauthConsumer, oauthService, okhttpClient)
-    }
+  @Before
+  fun setUp() {
+    oauthClient = Oauth1Client(oauthConsumer, oauthService, okhttpClient)
+  }
 
-    @Test
-    fun getAuthorizationUrl() {
-        print("authorization url: ${oauthClient.getAuthorizationUrl()}")
-    }
+  @Test
+  fun getAuthorizationUrl() {
+    // Uncomment Rule above and line below, then run for instructions
+    // print("authorization url: ${oauthClient.getAuthorizationUrl()}")
+  }
 }

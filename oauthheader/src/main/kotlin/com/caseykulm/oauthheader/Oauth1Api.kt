@@ -1,6 +1,8 @@
 package com.caseykulm.oauthheader
 
-import com.caseykulm.oauthheader.models.TokenResponse
+import com.caseykulm.oauthheader.models.AccessTokenResponse
+import com.caseykulm.oauthheader.models.AuthorizationResponse
+import com.caseykulm.oauthheader.models.RequestTokenResponse
 
 interface Oauth1Api {
     /**
@@ -12,6 +14,8 @@ interface Oauth1Api {
      */
     fun getAuthorizationUrl(): String
 
+    fun parseVerificationResponse(rawQuery: String): AuthorizationResponse
+
     /**
      * Retrieves an Access Token from the OAuth Service, and returns the token
      * to be stored securely. This is the Token you will sign every request with.
@@ -21,7 +25,7 @@ interface Oauth1Api {
      *
      * NOTE: This is blocking work, and should be performed on a worker thread.
      */
-    fun getAccessToken(oauthToken: String, oauthVerifier: String): TokenResponse
+    fun getAccessToken(requestTokenResponse: RequestTokenResponse, authorizationResponse: AuthorizationResponse): AccessTokenResponse
 
     fun getSignedAuthHeader(accessToken: String, accessSecret: String): String
 }
