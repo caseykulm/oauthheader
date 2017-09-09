@@ -13,7 +13,6 @@ class RavelryOauthServiceTest {
       "YOUR_RAVELRY_CONSUMER_KEY",
       "YOUR_RAVELRY_CONSUMER_SECRET",
       "YOUR_CALLBACK")
-  // @Rule @JvmField val oauthConsumerRule = OauthConsumerSetRule(oauthConsumer)
   val oauthService = RavelryOauthService()
   val okhttpClient = OkHttpClient.Builder().build()
   lateinit var oauthClient: Oauth1Api
@@ -25,7 +24,9 @@ class RavelryOauthServiceTest {
 
   @Test
   fun getAuthorizationUrl() {
-    // Uncomment Rule above and line below, then run for instructions
+    // Step 1: Update oauthconsumer above with your info
+    // Step 2: uncomment print line below
+    // Step 3: run for instructions
     // print("authorization url: ${oauthClient.getAuthorizationUrl()}")
   }
 }
