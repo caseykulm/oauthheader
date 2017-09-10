@@ -42,10 +42,10 @@ class OauthAuthHeaderGenerator(
     return baseOauthStrBuilder().append(oauthTreeMapToString(
         addOauthVerifierFieldSorted(
             verifier, addTokenFieldSorted(
-              requestToken, addCommonOauthFieldsSorted(
-                request, OauthStage.GET_ACCESS_TOKEN, requestToken, requestTokenSecret, TreeMap()
-              )
-            )
+            requestToken, addCommonOauthFieldsSorted(
+            request, OauthStage.GET_ACCESS_TOKEN, requestToken, requestTokenSecret, TreeMap()
+        )
+        )
         )
     )).toString()
   }
@@ -60,8 +60,8 @@ class OauthAuthHeaderGenerator(
     return baseOauthStrBuilder().append(oauthTreeMapToString(
         addTokenFieldSorted(
             accessToken, addCommonOauthFieldsSorted(
-              request, OauthStage.GET_RESOURCE, accessToken, accessTokenSecret, TreeMap()
-            )
+            request, OauthStage.GET_RESOURCE, accessToken, accessTokenSecret, TreeMap()
+        )
         )
     )).toString()
   }
