@@ -18,16 +18,15 @@ class Oauth1Client(
       val AUTH_HEADER_KEY = "Authorization"
     }
 
-    override fun getAuthorizationUrl(): String {
-        println("Step 1: Fetching Oauth Request Token")
-        val requestTokenBodyString = getTokenResponseBodyString(
-                OauthStage.GET_REQUEST_TOKEN,
-                getPremadeRequest(oauthService.requestTokenUrl))
+    override fun getRequestToken(): RequestTokenResponse {
+      val requestTokenBodyString = getTokenResponseBodyString(
+          OauthStage.GET_REQUEST_TOKEN,
+          getPremadeRequest(oauthService.requestTokenUrl))
 
-        println("Step 2: Parsing Request Token")
-        val requestTokenResponse = toRequestTokenResponse(requestTokenBodyString)
+      return toRequestTokenResponse(requestTokenBodyString)
+    }
 
-        println("Step 3: Formatting Authorization URL")
+    override fun getAuthorizationUrl(requestTokenResponse: RequestTokenResponse): String {
         val authorizationUrl = HttpUrl.parse(oauthService.authorizeUrl)
         if (authorizationUrl == null) throw IllegalStateException("Failed to parse authorize url")
         val authorizationUrlAuthed = authorizationUrl.newBuilder()

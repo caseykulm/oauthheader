@@ -41,16 +41,24 @@ val oauthClient = Oauth1Client(
   okhttpClient)
 ```
 
+### Step 1: Get a Request Token
+
+Kick off the first request to get the request token which we will use later.
+
+```kotlin
+val requestTokenResponse: RequestTokenResponse = oauthClient.getRequestToken()
+```
+
 ### Step 1: Get a formatted Authorization URL
 
 This will form the url you should send your users to. If you set 
 the callback url, the data for the next step will be sent there.
 
 ```kotlin
-val authorizationUrl: String = oauthClient.getAuthorizationUrl()
+val authorizationUrl: String = oauthClient.getAuthorizationUrl(requestTokenResponse)
 ```
 
-### Step 2: Intercept Authorization Response
+### Step 2: Intercept the Authorization Response
 
 You should intercept the query string from the Oauth page 
 calling your callback and it will look something like this
@@ -63,13 +71,12 @@ Then you should use this helper to parse the response to
 check if it is valid, and to pass as input to the next step.
 
 ```kotlin
-val authorizationResponse: AuthorizationResponse = oauthClient.parseVerificationResponse(rawResponseStr)
+val authorizationResponse: AuthorizationResponse = oauthClient.parseVerificationResponse(rawQueryStr)
 ```
 
-### Step 3: Get Access Token
+### Step 3: Get a Access Token
 
-TODO: Where do they get requestTokenResponse in this flow so far. 
-It was abstracted away from them, but will be necessary here.
+Now you can get an access token.
 
 ```kotlin
 val accessTokenResponse: AccessTokenResponse = oauthClient.getAccessToken(
@@ -110,3 +117,20 @@ val signedResourceRequest = resourceRequest.newBuilder()
 
 And now your good to send off an authenticated request 🎉
 
+## Steps after Authenticating Once
+
+You need to persist both the 
+```AccessTokenResponse``` and the ```AuthorizationResponse``` in order to 
+avoid needing to do steps 1-3 in the future.
+
+Assuming you have those, you should just be able to perform Step 4 for 
+every request to the service moving forward.
+
+## Reauthorizing
+
+Although the ```signedResourceRequest``` will usually work, you should 
+expect that it can return 401 at any point, do to multiple reasons such 
+as the user revoking your client apps access, your consumer values being 
+revoked/expired, etc.
+
+If that happens then you should proceed from Step 1.

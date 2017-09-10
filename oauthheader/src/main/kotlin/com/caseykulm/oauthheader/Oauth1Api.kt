@@ -7,13 +7,17 @@ import okhttp3.Request
 
 interface Oauth1Api {
     /**
-     * Retrieves a Request Token from the OAuth Service, and uses the response
-     * from that to form the Authorization URL. This is the URL you send your
-     * user to, for them to give your App permissions.
+     * Retrieves a Request Token from the OAuth Service
      *
      * NOTE: This is blocking work, and should be performed on a worker thread.
      */
-    fun getAuthorizationUrl(): String
+    fun getRequestToken(): RequestTokenResponse
+
+    /**
+     * Uses the RequestTokenResponse to form the Authorization URL. This is the URL you send your
+     * user to, for them to give your App permissions.
+     */
+    fun getAuthorizationUrl(requestTokenResponse: RequestTokenResponse): String
 
     fun parseVerificationResponse(rawQuery: String): AuthorizationResponse
 
