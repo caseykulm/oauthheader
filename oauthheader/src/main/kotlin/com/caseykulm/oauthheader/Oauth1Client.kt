@@ -14,6 +14,10 @@ class Oauth1Client(
         val oauthConsumer: OauthConsumer,
         val oauthService: OauthService,
         val okHttpClient: OkHttpClient): Oauth1Api {
+    companion object {
+      val AUTH_HEADER_KEY = "Authorization"
+    }
+
     override fun getAuthorizationUrl(): String {
         println("Step 1: Fetching Oauth Request Token")
         val requestTokenBodyString = getTokenResponseBodyString(
@@ -54,13 +58,16 @@ class Oauth1Client(
         return authorizationResponse
     }
 
-    override fun getAccessToken(requestTokenResponse: RequestTokenResponse, authorizationResponse: AuthorizationResponse): AccessTokenResponse {
+    override fun getAccessToken(
+        requestTokenResponse: RequestTokenResponse,
+        authorizationResponse: AuthorizationResponse): AccessTokenResponse {
         println("Step 1: Fetching Oauth Access Token")
         val requestTokenBodyString = getTokenResponseBodyString(
                 OauthStage.GET_ACCESS_TOKEN,
                 getPremadeRequest(oauthService.accessTokenUrl),
                 requestTokenResponse.oauthToken,
-                requestTokenResponse.oauthTokenSecret)
+                requestTokenResponse.oauthTokenSecret,
+                authorizationResponse.oauthVerifier)
 
         println("Step 2: Parsing Access Token")
         return toAccessTokenResponse(requestTokenBodyString)
@@ -111,9 +118,9 @@ class Oauth1Client(
             tokenSecret: String = "",
             verifier: String = ""): String {
         val authHeaderValue = getAuthHeaderValue(oauthStage, request, token, tokenSecret, verifier)
-        println("Request Header - ${OauthAuthHeaderGenerator.authHeaderKey}: ${authHeaderValue}")
+        println("Request Header - ${AUTH_HEADER_KEY}: ${authHeaderValue}")
         val tokenRequestAuthed = request.newBuilder()
-                .header(OauthAuthHeaderGenerator.authHeaderKey, authHeaderValue)
+                .header(AUTH_HEADER_KEY, authHeaderValue)
                 .build()
         val tokenOkResponse = okHttpClient.newCall(tokenRequestAuthed).execute()
         val tokenResponseBody = tokenOkResponse.body()
@@ -121,7 +128,15 @@ class Oauth1Client(
         return tokenResponseBody.string()
     }
 
-    override fun getSignedResourceAuthHeader(request: Request, accessToken: String, accessSecret: String): String {
-        return getAuthHeaderValue(OauthStage.GET_RESOURCE, request, accessToken, accessSecret)
+    override fun getSignedResourceAuthHeader(
+        request: Request,
+        authorizationResponse: AuthorizationResponse,
+        accessTokenResponse: AccessTokenResponse): String {
+        return getAuthHeaderValue(
+            OauthStage.GET_RESOURCE,
+            request,
+            accessTokenResponse.oauthToken,
+            accessTokenResponse.oauthTokenSecret,
+            authorizationResponse.oauthVerifier)
     }
 }

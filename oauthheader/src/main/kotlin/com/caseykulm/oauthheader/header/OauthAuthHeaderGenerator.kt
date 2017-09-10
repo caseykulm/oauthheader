@@ -16,10 +16,6 @@ class OauthAuthHeaderGenerator(
       calendar,
       nonceGenerator)
 
-  companion object {
-    val authHeaderKey = "Authorization"
-  }
-
   private fun baseOauthStrBuilder() = StringBuilder("OAuth ")
 
   /**

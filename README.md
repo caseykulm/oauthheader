@@ -6,7 +6,7 @@ An OkHttp helper for generating the three bits needed for 3 legged OAuth.
 2. Authorize
 3. Access Token
 
-## Example
+## Steps from scratch
 
 ### Step 0: Define your OAuth constants
 
@@ -42,19 +42,42 @@ val oauthClient = Oauth1Client(
 
 ### Step 1: Get a formatted Authorization URL
 
-```kotlin
-val authorizationUrl = oauthClient.getAuthorizationUrl()
-```
-
-### Step 3: Getting Request Token
-
-Create an AccessTokenResponse object.
+This will form the url you should send your users to. If you set 
+the callback url, the data for the next step will be sent there.
 
 ```kotlin
-val accessTokenResponse = AccessTokenResponse("CONSUMER_ACCESS_TOKEN", "CONSUMER_VERIFIER")
+val authorizationUrl: String = oauthClient.getAuthorizationUrl()
 ```
 
-Your request for a resource on Service, that will require OAuth.
+### Step 2: Intercept Authorization Response
+
+You should intercept the query string from the Oauth page 
+calling your callback and it will look something like this
+
+```kotlin
+val rawQueryStr = "oauth_token=123abc&oauth_verifier"
+```  
+
+Then you should use this helper to parse the response to 
+check if it is valid, and to pass as input to the next step.
+
+```kotlin
+val authorizationResponse: AuthorizationResponse = oauthClient.parseVerificationResponse(rawResponseStr)
+```
+
+### Step 3: Get Access Token
+
+TODO: Where do they get requestTokenResponse in this flow so far. 
+It was abstracted away from them, but will be necessary here.
+
+```kotlin
+val accessTokenResponse: AccessTokenResponse = oauthClient.getAccessToken(requestTokenResponse, authorizationResponse)
+```
+
+### Step 4: Getting a Signed Resource Request Header 
+
+Your request for a resource on Service, that will require OAuth, might look 
+something like this.
 
 ```kotlin
 val body = FormBody.Builder()
@@ -66,24 +89,22 @@ val resourceRequest = Request.Builder()
     .build()
 ```
 
-Create the ```OauthAuthHeaderGenerator``` object which will create 
-the header for us.
+Get a signed header from the oauthClient, providing the stuff we've 
+acquired so far.
 
 ```kotlin
-val oauthHeaderGenerator = OauthAuthHeaderGenerator(
-    consumerKey,
-    consumerSecret,
-    accessToken,
-    accessSecret,
-    resourceRequest)
+val signedHeaderValue: String = oauthClient.getSignedResourceAuthHeader(
+  resourceRequest, authorizationResponse, accessTokenResponse)
 ```
 
-Create the authorization header, and add it to to the request.
+Add it to your resource request, also using the provided constant for 
+the Header Key.
 
 ```kotlin
-val oauthRequestHeader = Headers.Builder()
-    .add(OauthAuthHeaderGenerator.authHeaderKey, oauthHeaderGenerator.getAuthHeaderValue())
-val requestTokenRequest = Request.Builder()
-    .headers(oauthRequestHeader.build())
-    .build()
+val signedResourceRequest = resourceRequest.newBuilder()
+  .addHeader(Oauth1Client.AUTH_HEADER_KEY, signedHeaderValue)
+  .build()
 ```
+
+And now your good to send off an authenticated request 🎉
+
