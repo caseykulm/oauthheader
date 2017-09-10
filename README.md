@@ -98,8 +98,26 @@ val resourceRequest = Request.Builder()
     .build()
 ```
 
-Get a signed header from the oauthClient, providing the stuff we've 
-acquired so far.
+**OkHttp Interceptor to add header to each request**
+
+You can now use the provided helper interceptor.
+
+```kotlin
+val oauthInterceptor = Oauth1Interceptor(oauth1Client, authorizationResponse, accessTokenResponse)
+```
+
+And add it to your OkHttpClient instance.
+
+```kotlin
+val oauthSessionClient = unauthedClient.newBuilder()
+  .addInterceptor(oauthInterceptor)
+  .build()
+```
+
+**Manually add header to each request**
+
+Or you can manually get a signed header from the oauthClient, providing 
+the stuff we've acquired so far.
 
 ```kotlin
 val signedHeaderValue: String = oauthClient.getSignedResourceAuthHeader(
@@ -115,7 +133,7 @@ val signedResourceRequest = resourceRequest.newBuilder()
   .build()
 ```
 
-And now your good to send off an authenticated request 🎉
+And now your good to send off an authenticated requests 🎉
 
 ## Steps after Authenticating Once
 
