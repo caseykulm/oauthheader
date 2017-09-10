@@ -1,10 +1,11 @@
 # OAuth Header
 
-An OkHttp helper for generating the three bits needed for 3 legged OAuth. 
+An OkHttp helper for generating the four bits needed for 3 legged OAuth. 
 
 1. Request Token
 2. Authorize
 3. Access Token
+4. Resource Request Signing oauthheader 
 
 ## Steps from scratch
 
@@ -71,7 +72,8 @@ TODO: Where do they get requestTokenResponse in this flow so far.
 It was abstracted away from them, but will be necessary here.
 
 ```kotlin
-val accessTokenResponse: AccessTokenResponse = oauthClient.getAccessToken(requestTokenResponse, authorizationResponse)
+val accessTokenResponse: AccessTokenResponse = oauthClient.getAccessToken(
+  requestTokenResponse, authorizationResponse)
 ```
 
 ### Step 4: Getting a Signed Resource Request Header 
