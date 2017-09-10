@@ -49,7 +49,7 @@ Kick off the first request to get the request token which we will use later.
 val requestTokenResponse: RequestTokenResponse = oauthClient.getRequestToken()
 ```
 
-### Step 1: Get a formatted Authorization URL
+### Step 2: Get a formatted Authorization URL
 
 This will form the url you should send your users to. If you set 
 the callback url, the data for the next step will be sent there.
@@ -58,7 +58,7 @@ the callback url, the data for the next step will be sent there.
 val authorizationUrl: String = oauthClient.getAuthorizationUrl(requestTokenResponse)
 ```
 
-### Step 2: Intercept the Authorization Response
+### Step 3: Intercept the Authorization Response
 
 You should intercept the query string from the Oauth page 
 calling your callback and it will look something like this
@@ -74,7 +74,7 @@ check if it is valid, and to pass as input to the next step.
 val authorizationResponse: AuthorizationResponse = oauthClient.parseVerificationResponse(rawQueryStr)
 ```
 
-### Step 3: Get a Access Token
+### Step 4: Get a Access Token
 
 Now you can get an access token.
 
@@ -83,7 +83,7 @@ val accessTokenResponse: AccessTokenResponse = oauthClient.getAccessToken(
   requestTokenResponse, authorizationResponse)
 ```
 
-### Step 4: Getting a Signed Resource Request Header 
+### Step 5: Getting a Signed Resource Request Header 
 
 Your request for a resource on Service, that will require OAuth, might look 
 something like this.
@@ -121,9 +121,9 @@ And now your good to send off an authenticated request 🎉
 
 You need to persist both the 
 ```AccessTokenResponse``` and the ```AuthorizationResponse``` in order to 
-avoid needing to do steps 1-3 in the future.
+avoid needing to do Steps 1-4 in the future.
 
-Assuming you have those, you should just be able to perform Step 4 for 
+Assuming you have those, you should just be able to perform Step 5 for 
 every request to the service moving forward.
 
 ## Reauthorizing
