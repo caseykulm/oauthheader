@@ -129,7 +129,7 @@ class OauthAuthHeaderGenerator(
   private fun addOauthVerifierFieldSorted(verifier: String, fields: TreeMap<String, String>): TreeMap<String, String> {
     val newFields = TreeMap<String, String>()
     newFields.putAll(fields)
-    newFields.put(OAUTH_VERIFIER, """="${ESCAPER.escape(verifier)}"""")
+    newFields.put(OAUTH_VERIFIER, """"${ESCAPER.escape(verifier)}"""")
     return newFields
   }
 }
