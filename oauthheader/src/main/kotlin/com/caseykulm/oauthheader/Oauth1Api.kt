@@ -3,6 +3,7 @@ package com.caseykulm.oauthheader
 import com.caseykulm.oauthheader.models.AccessTokenResponse
 import com.caseykulm.oauthheader.models.AuthorizationResponse
 import com.caseykulm.oauthheader.models.RequestTokenResponse
+import okhttp3.Request
 
 interface Oauth1Api {
     /**
@@ -27,5 +28,5 @@ interface Oauth1Api {
      */
     fun getAccessToken(requestTokenResponse: RequestTokenResponse, authorizationResponse: AuthorizationResponse): AccessTokenResponse
 
-    fun getSignedAuthHeader(accessToken: String, accessSecret: String): String
+    fun getSignedResourceAuthHeader(request: Request, accessToken: String, accessSecret: String): String
 }

@@ -16,9 +16,9 @@ class Oauth1Client(
         val okHttpClient: OkHttpClient): Oauth1Api {
     override fun getAuthorizationUrl(): String {
         println("Step 1: Fetching Oauth Request Token")
-        val requestTokenBodyString = getTokenBodyString(
+        val requestTokenBodyString = getTokenResponseBodyString(
                 OauthStage.GET_REQUEST_TOKEN,
-                oauthService.requestTokenUrl)
+                getPremadeRequest(oauthService.requestTokenUrl))
 
         println("Step 2: Parsing Request Token")
         val requestTokenResponse = toRequestTokenResponse(requestTokenBodyString)
@@ -56,9 +56,9 @@ class Oauth1Client(
 
     override fun getAccessToken(requestTokenResponse: RequestTokenResponse, authorizationResponse: AuthorizationResponse): AccessTokenResponse {
         println("Step 1: Fetching Oauth Access Token")
-        val requestTokenBodyString = getTokenBodyString(
+        val requestTokenBodyString = getTokenResponseBodyString(
                 OauthStage.GET_ACCESS_TOKEN,
-                oauthService.accessTokenUrl,
+                getPremadeRequest(oauthService.accessTokenUrl),
                 requestTokenResponse.oauthToken,
                 requestTokenResponse.oauthTokenSecret)
 
@@ -66,33 +66,53 @@ class Oauth1Client(
         return toAccessTokenResponse(requestTokenBodyString)
     }
 
-    private fun getTokenBodyString(
+    private fun getAuthHeaderValue(
+        oauthStage: OauthStage,
+        request: Request,
+        token: String = "",
+        tokenSecret: String = "",
+        verifier: String = ""): String {
+      val oauthHeaderGenerator = OauthAuthHeaderGenerator(
+          oauthConsumer)
+      val authHeaderValue: String
+      when (oauthStage) {
+        OauthStage.GET_REQUEST_TOKEN -> {
+          authHeaderValue = oauthHeaderGenerator.getRequestTokenAuthHeaderValue(request)
+        }
+        OauthStage.GET_ACCESS_TOKEN -> {
+          authHeaderValue = oauthHeaderGenerator.getAccessTokenAuthHeaderValue(request, verifier, token, tokenSecret)
+        }
+        OauthStage.GET_RESOURCE -> {
+          authHeaderValue = oauthHeaderGenerator.getResourceAuthHeaderValue(request, token, tokenSecret)
+        }
+      }
+      return authHeaderValue
+    }
+
+    /**
+    * Only for RequestToken requests, or AccessToken requests.
+    *
+    * Resource requests should use the Request object for the
+    * actual resource.
+    */
+    private fun getPremadeRequest(tokenUrl: String): Request {
+      val tokenHttpUrl = HttpUrl.parse(tokenUrl)
+      val tokenOkRequest = Request.Builder()
+          .url(tokenHttpUrl)
+          .post(FormBody.Builder().build())
+          .build()
+      return tokenOkRequest
+    }
+
+    private fun getTokenResponseBodyString(
             oauthStage: OauthStage,
-            tokenUrl: String,
+            request: Request,
             token: String = "",
             tokenSecret: String = "",
             verifier: String = ""): String {
-        val tokenHttpUrl = HttpUrl.parse(tokenUrl)
-        val tokenOkRequest = Request.Builder()
-                .url(tokenHttpUrl)
-                .post(FormBody.Builder().build())
-                .build()
-        val oauthHeaderGenerator = OauthAuthHeaderGenerator(
-                oauthConsumer)
-        val authHeaderValue: String
-        when (oauthStage) {
-            OauthStage.GET_REQUEST_TOKEN -> {
-                authHeaderValue = oauthHeaderGenerator.getRequestTokenAuthHeaderValue(tokenOkRequest)
-            }
-            OauthStage.GET_ACCESS_TOKEN -> {
-                authHeaderValue = oauthHeaderGenerator.getAccessTokenAuthHeaderValue(tokenOkRequest, verifier, token, tokenSecret)
-            }
-            OauthStage.GET_RESOURCE -> {
-                authHeaderValue = oauthHeaderGenerator.getResourceAuthHeaderValue(tokenOkRequest, token, tokenSecret)
-            }
-        }
+        val authHeaderValue = getAuthHeaderValue(oauthStage, request, token, tokenSecret, verifier)
         println("Request Header - ${OauthAuthHeaderGenerator.authHeaderKey}: ${authHeaderValue}")
-        val tokenRequestAuthed = tokenOkRequest.newBuilder()
+        val tokenRequestAuthed = request.newBuilder()
                 .header(OauthAuthHeaderGenerator.authHeaderKey, authHeaderValue)
                 .build()
         val tokenOkResponse = okHttpClient.newCall(tokenRequestAuthed).execute()
@@ -101,7 +121,7 @@ class Oauth1Client(
         return tokenResponseBody.string()
     }
 
-    override fun getSignedAuthHeader(accessToken: String, accessSecret: String): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getSignedResourceAuthHeader(request: Request, accessToken: String, accessSecret: String): String {
+        return getAuthHeaderValue(OauthStage.GET_RESOURCE, request, accessToken, accessSecret)
     }
 }
