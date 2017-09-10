@@ -130,6 +130,7 @@ class OauthAuthHeaderGenerator(
     val newFields = TreeMap<String, String>()
     newFields.putAll(fields)
     newFields.put(OAUTH_VERIFIER, """"${ESCAPER.escape(verifier)}"""")
+    // TODO: AccessToken request is failing with 401, might be verifier/token/tokenSecret??
     return newFields
   }
 }
