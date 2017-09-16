@@ -41,11 +41,11 @@ class OauthAuthHeaderGenerator(
       requestTokenSecret: String): String {
     return baseOauthStrBuilder().append(oauthTreeMapToString(
         addOauthVerifierFieldSorted(
-            verifier, addTokenFieldSorted(
+          verifier, addTokenFieldSorted(
             requestToken, addCommonOauthFieldsSorted(
-            request, OauthStage.GET_ACCESS_TOKEN, requestToken, requestTokenSecret, TreeMap()
-        )
-        )
+              request, OauthStage.GET_ACCESS_TOKEN, requestToken, requestTokenSecret, verifier, TreeMap()
+            )
+          )
         )
     )).toString()
   }
@@ -59,9 +59,9 @@ class OauthAuthHeaderGenerator(
       accessTokenSecret: String): String {
     return baseOauthStrBuilder().append(oauthTreeMapToString(
         addTokenFieldSorted(
-            accessToken, addCommonOauthFieldsSorted(
-            request, OauthStage.GET_RESOURCE, accessToken, accessTokenSecret, TreeMap()
-        )
+          accessToken, addCommonOauthFieldsSorted(
+            request, OauthStage.GET_RESOURCE, accessToken, accessTokenSecret, fields = TreeMap()
+          )
         )
     )).toString()
   }
@@ -85,10 +85,11 @@ class OauthAuthHeaderGenerator(
       oauthStage: OauthStage,
       token: String = "",
       tokenSecret: String = "",
+      verifier: String = "",
       fields: TreeMap<String, String>): TreeMap<String, String> {
     val newFields = TreeMap<String, String>()
     newFields.putAll(fields)
-    val signatureSnapshotData = signatureGenerator.getSignatureSnapshotData(request, oauthStage, token, tokenSecret)
+    val signatureSnapshotData = signatureGenerator.getSignatureSnapshotData(request, oauthStage, token, tokenSecret, verifier)
     newFields.put(OAUTH_CONSUMER_KEY, """"${oauthConsumer.consumerKey}"""")
     newFields.put(OAUTH_NONCE, """"${signatureSnapshotData.nonce}"""")
     newFields.put(OAUTH_SIGNATURE, """"${signatureSnapshotData.signatureEncoded}"""")

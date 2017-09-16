@@ -18,18 +18,18 @@ class SignatureGenerator(
     val oauthConsumer: OauthConsumer,
     val calendar: Calendar,
     val nonceGenerator: NonceGenerator) {
-  internal fun getSignatureSnapshotData(request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = ""): SignatureSnapshotData {
+  internal fun getSignatureSnapshotData(request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = "", verifier: String = ""): SignatureSnapshotData {
     val nonce = nonceGenerator.generate()
     val timeStamp = calendar.utcTimeStamp()
-    return SignatureSnapshotData(timeStamp, nonce, getSignatureEncoded(nonce, timeStamp, request, oauthStage, token, tokenSecret))
+    return SignatureSnapshotData(timeStamp, nonce, getSignatureEncoded(nonce, timeStamp, request, oauthStage, token, tokenSecret, verifier))
   }
 
-  internal fun getSignatureEncoded(nonce: String, timeStamp: Long, request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = ""): String {
-    return ESCAPER.escape(getSignature(nonce, timeStamp, request, oauthStage, token, tokenSecret))
+  internal fun getSignatureEncoded(nonce: String, timeStamp: Long, request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = "", verifier: String = ""): String {
+    return ESCAPER.escape(getSignature(nonce, timeStamp, request, oauthStage, token, tokenSecret, verifier))
   }
 
-  internal fun getSignature(nonce: String, timeStamp: Long, request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = ""): String {
-    return getSignature(getSigningKey(oauthStage, tokenSecret), getBaseString(nonce, timeStamp, request, oauthStage, token))
+  internal fun getSignature(nonce: String, timeStamp: Long, request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = "", verifier: String = ""): String {
+    return getSignature(getSigningKey(oauthStage, tokenSecret), getBaseString(nonce, timeStamp, request, oauthStage, token, verifier))
   }
 
   private fun getSignature(signingKey: String, baseString: String): String {
@@ -53,8 +53,9 @@ class SignatureGenerator(
       timeStamp: Long,
       request: Request,
       oauthStage: OauthStage,
-      token: String = ""): String {
-    return "${getVerb(request)}&${getResourcePathEncoded(request)}&${getParamsEncodedString(nonce, timeStamp, request, oauthStage, token)}"
+      token: String = "",
+      verifier: String = ""): String {
+    return "${getVerb(request)}&${getResourcePathEncoded(request)}&${getParamsEncodedString(nonce, timeStamp, request, oauthStage, token, verifier)}"
   }
 
   internal fun getParamsEncodedString(
@@ -62,8 +63,9 @@ class SignatureGenerator(
       timeStamp: Long,
       request: Request,
       oauthStage: OauthStage,
-      token: String = ""): String {
-    val paramsEncodedTree = getParamsEncoded(nonce, timeStamp, request, oauthStage, token)
+      token: String = "",
+      verifier: String = ""): String {
+    val paramsEncodedTree = getParamsEncoded(nonce, timeStamp, request, oauthStage, token, verifier)
     return paramsEncodedTreeToString(paramsEncodedTree)
   }
 
@@ -72,14 +74,15 @@ class SignatureGenerator(
       timeStamp: Long,
       request: Request,
       oauthStage: OauthStage,
-      token: String = ""): TreeMap<String, String> {
+      token: String = "",
+      verifier: String = ""): TreeMap<String, String> {
     return addFormBodyEncoded(
         request, addQueryParamsEncoded(
-        request, addOauthParamsEncoded(
-        nonce, timeStamp, oauthStage, token, TreeMap()
-    )
-    )
-    )
+          request, addOauthParamsEncoded(
+              nonce, timeStamp, oauthStage, token, verifier, TreeMap()
+            )
+          )
+        )
   }
 
   // add in oauth stuff
@@ -88,12 +91,16 @@ class SignatureGenerator(
       timeStamp: Long,
       oauthStage: OauthStage,
       token: String = "",
+      verifier: String = "",
       params: TreeMap<String, String>): TreeMap<String, String> {
     val updatedParams = TreeMap<String, String>()
     updatedParams.putAll(params)
     updatedParams.put(OAUTH_CONSUMER_KEY, oauthConsumer.consumerKey)
     if (oauthStage == OauthStage.GET_ACCESS_TOKEN || oauthStage == OauthStage.GET_RESOURCE) {
       updatedParams.put(OAUTH_TOKEN, token)
+    }
+    if (oauthStage == OauthStage.GET_ACCESS_TOKEN) {
+      updatedParams.put(OAUTH_VERIFIER, verifier)
     }
     updatedParams.put(OAUTH_NONCE, nonce)
     updatedParams.put(OAUTH_TIMESTAMP, timeStamp.toString())
