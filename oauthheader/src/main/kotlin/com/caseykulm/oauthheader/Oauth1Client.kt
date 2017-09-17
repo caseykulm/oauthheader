@@ -129,13 +129,11 @@ class Oauth1Client(
 
   override fun getSignedResourceAuthHeader(
       request: Request,
-      authorizationResponse: AuthorizationResponse,
       accessTokenResponse: AccessTokenResponse): String {
     return getAuthHeaderValue(
         OauthStage.GET_RESOURCE,
         request,
         accessTokenResponse.oauthToken,
-        accessTokenResponse.oauthTokenSecret,
-        authorizationResponse.oauthVerifier)
+        accessTokenResponse.oauthTokenSecret)
   }
 }

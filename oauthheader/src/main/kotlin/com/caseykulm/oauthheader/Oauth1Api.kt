@@ -32,5 +32,5 @@ interface Oauth1Api {
    */
   fun getAccessToken(requestTokenResponse: RequestTokenResponse, authorizationResponse: AuthorizationResponse): AccessTokenResponse
 
-  fun getSignedResourceAuthHeader(request: Request, authorizationResponse: AuthorizationResponse, accessTokenResponse: AccessTokenResponse): String
+  fun getSignedResourceAuthHeader(request: Request, accessTokenResponse: AccessTokenResponse): String
 }

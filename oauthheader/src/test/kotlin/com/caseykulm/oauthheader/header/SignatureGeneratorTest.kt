@@ -28,7 +28,7 @@ class SignatureGeneratorTest {
   fun getSigningKeyTest() {
     assertEquals(
         "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw&LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
-        siggyGen.getSigningKey(oauthStage, accessSecret))
+        siggyGen.getSigningKey(accessSecret))
   }
 
   @Test

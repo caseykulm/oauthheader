@@ -29,7 +29,7 @@ class SignatureGenerator(
   }
 
   internal fun getSignature(nonce: String, timeStamp: Long, request: Request, oauthStage: OauthStage, token: String = "", tokenSecret: String = "", verifier: String = ""): String {
-    return getSignature(getSigningKey(oauthStage, tokenSecret), getBaseString(nonce, timeStamp, request, oauthStage, token, verifier))
+    return getSignature(getSigningKey(tokenSecret), getBaseString(nonce, timeStamp, request, oauthStage, token, verifier))
   }
 
   private fun getSignature(signingKey: String, baseString: String): String {
@@ -173,25 +173,28 @@ class SignatureGenerator(
   }
 
   /**
-   * Signature Key
-   *
-   * The OAuth plugin only supports a single signature method: HMAC-SHA1. This uses a HMAC (Hash-based Message Authentication Code), which looks similar to a normal SHA1 hash, but differs significantly. Importantly, it's immune to length extension attacks. It also needs two pieces: a key and the text to hash. The text is the base string created above.
-   *
-   * The signature key for HMAC-SHA1 is created by taking the client/consumer secret and the token secret, URL-encoding each, then concatenating them with & into a string.
+   * Produces a signing key which will be combined with the base string to
+   * produce the final signature.
    *
    * This process is always the same, even if you don't have a token yet.
    *
-   * For example, if your client secret is abcd and your token secret is 1234, the key is abcd&1234. If your client secret is abcd, and you don't have a token yet, the key is abcd&.
+   * For example, if your clientSecret is "abcd",
+   *
+   * Case 1: Building requestToken signature. Then signing key is "abcd&"
+   *
+   * Case 2: Building accessToken signature, and requestTokenSecret was foo.
+   * Then signing key is "abcd&foo"
+   *
+   * Case 3: Building resourceToken signature, and accessTokenSecret was bar.
+   *  Then signing key is "abcd&bar"
+   *
+   * Input: tokenSecret from previous step if available, empty string otherwise
+   *
+   * Output: signing key
    */
-  internal fun getSigningKey(oauthStage: OauthStage, tokenSecret: String = ""): String {
+  internal fun getSigningKey(tokenSecret: String = ""): String {
     val escapedConsumerSecret = ESCAPER.escape(oauthConsumer.consumerSecret)
-    val signingAccessSecret: String
-    if (oauthStage == OauthStage.GET_ACCESS_TOKEN|| oauthStage == OauthStage.GET_RESOURCE) {
-      signingAccessSecret = tokenSecret
-    } else {
-      signingAccessSecret = ""
-    }
-    val escapedAccessSigningSecret = ESCAPER.escape(signingAccessSecret)
+    val escapedAccessSigningSecret = ESCAPER.escape(tokenSecret)
     return "${escapedConsumerSecret}&${escapedAccessSigningSecret}"
   }
 
