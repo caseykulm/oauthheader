@@ -8,12 +8,11 @@ import okhttp3.Response
 
 class Oauth1Interceptor(
     val oauth1Client: Oauth1Client,
-    val authorizationResponse: AuthorizationResponse,
     val accessTokenResponse: AccessTokenResponse) : Interceptor {
   @Throws(IOException::class)
   override fun intercept(chain: Interceptor.Chain): Response? {
     val signedResourceAuthHeader = oauth1Client.getSignedResourceAuthHeader(
-        chain.request(), authorizationResponse, accessTokenResponse)
+        chain.request(), accessTokenResponse)
     val signedRequest = chain.request().newBuilder()
         .addHeader(Oauth1Client.AUTH_HEADER_KEY, signedResourceAuthHeader)
         .build()
