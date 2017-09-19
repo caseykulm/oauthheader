@@ -103,7 +103,7 @@ val resourceRequest = Request.Builder()
 You can now use the provided helper interceptor.
 
 ```kotlin
-val oauthInterceptor = Oauth1Interceptor(oauth1Client, authorizationResponse, accessTokenResponse)
+val oauthInterceptor = Oauth1Interceptor(oauth1Client, accessTokenResponse)
 ```
 
 And add it to your OkHttpClient instance.
