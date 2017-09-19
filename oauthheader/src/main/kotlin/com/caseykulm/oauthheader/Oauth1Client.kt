@@ -22,7 +22,6 @@ class Oauth1Client(
     val requestTokenBodyString = getTokenResponseBodyString(
         OauthStage.GET_REQUEST_TOKEN,
         getPremadeRequest(oauthService.requestTokenUrl))
-
     return toRequestTokenResponse(requestTokenBodyString)
   }
 
@@ -60,15 +59,12 @@ class Oauth1Client(
   override fun getAccessToken(
       requestTokenResponse: RequestTokenResponse,
       authorizationResponse: AuthorizationResponse): AccessTokenResponse {
-    println("Step 1: Fetching Oauth Access Token")
     val requestTokenBodyString = getTokenResponseBodyString(
         OauthStage.GET_ACCESS_TOKEN,
         getPremadeRequest(oauthService.accessTokenUrl),
         requestTokenResponse.oauthToken,
         requestTokenResponse.oauthTokenSecret,
         authorizationResponse.oauthVerifier)
-
-    println("Step 2: Parsing Access Token")
     return toAccessTokenResponse(requestTokenBodyString)
   }
 
@@ -117,7 +113,6 @@ class Oauth1Client(
       tokenSecret: String = "",
       verifier: String = ""): String {
     val authHeaderValue = getAuthHeaderValue(oauthStage, request, token, tokenSecret, verifier)
-    println("Request Header - ${AUTH_HEADER_KEY}: ${authHeaderValue}")
     val tokenRequestAuthed = request.newBuilder()
         .header(AUTH_HEADER_KEY, authHeaderValue)
         .build()

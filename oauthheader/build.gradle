@@ -1,5 +1,5 @@
 group 'com.caseykulm.oauthheader'
-version '0.2.5-SNAPSHOT'
+version '0.2.6-SNAPSHOT'
 
 buildscript {
     ext.kotlin_version = '1.1.4'

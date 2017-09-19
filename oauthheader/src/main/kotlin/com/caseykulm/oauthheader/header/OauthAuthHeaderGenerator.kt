@@ -22,13 +22,9 @@ class OauthAuthHeaderGenerator(
    * callback, no token, no secret, no verifier
    */
   fun getRequestTokenAuthHeaderValue(request: Request): String {
-    return baseOauthStrBuilder().append(oauthTreeMapToString(
-        addOauthCallbackFieldSorted(
-            addCommonOauthFieldsSorted(
-                request, OauthStage.GET_REQUEST_TOKEN, fields = TreeMap()
-            )
-        )
-    )).toString()
+    val oauthFieldsSorted = buildOauthFieldsSorted(request, OauthStage.GET_REQUEST_TOKEN)
+    val oauthFieldsString = oauthTreeMapToString(oauthFieldsSorted)
+    return baseOauthStrBuilder().append(oauthFieldsString).toString()
   }
 
   /**
@@ -39,15 +35,9 @@ class OauthAuthHeaderGenerator(
       verifier: String,
       requestToken: String,
       requestTokenSecret: String): String {
-    return baseOauthStrBuilder().append(oauthTreeMapToString(
-        addOauthVerifierFieldSorted(
-          verifier, addTokenFieldSorted(
-            requestToken, addCommonOauthFieldsSorted(
-              request, OauthStage.GET_ACCESS_TOKEN, requestToken, requestTokenSecret, verifier, TreeMap()
-            )
-          )
-        )
-    )).toString()
+    val oauthFieldsSorted = buildOauthFieldsSorted(request, OauthStage.GET_ACCESS_TOKEN, requestToken, requestTokenSecret, verifier)
+    val oauthFieldsString = oauthTreeMapToString(oauthFieldsSorted)
+    return baseOauthStrBuilder().append(oauthFieldsString).toString()
   }
 
   /**
@@ -57,13 +47,9 @@ class OauthAuthHeaderGenerator(
       request: Request,
       accessToken: String,
       accessTokenSecret: String): String {
-    return baseOauthStrBuilder().append(oauthTreeMapToString(
-        addTokenFieldSorted(
-          accessToken, addCommonOauthFieldsSorted(
-            request, OauthStage.GET_RESOURCE, accessToken, accessTokenSecret, fields = TreeMap()
-          )
-        )
-    )).toString()
+    val oauthFieldsSorted = buildOauthFieldsSorted(request, OauthStage.GET_RESOURCE, accessToken, accessTokenSecret)
+    val oauthFieldsString = oauthTreeMapToString(oauthFieldsSorted)
+    return baseOauthStrBuilder().append(oauthFieldsString).toString()
   }
 
   fun oauthTreeMapToString(treeMap: TreeMap<String, String>): String {
@@ -80,15 +66,13 @@ class OauthAuthHeaderGenerator(
     return stringBuilder.toString()
   }
 
-  private fun addCommonOauthFieldsSorted(
+  private fun buildOauthFieldsSorted(
       request: Request,
       oauthStage: OauthStage,
       token: String = "",
       tokenSecret: String = "",
-      verifier: String = "",
-      fields: TreeMap<String, String>): TreeMap<String, String> {
+      verifier: String = ""): TreeMap<String, String> {
     val newFields = TreeMap<String, String>()
-    newFields.putAll(fields)
     val signatureSnapshotData = signatureGenerator.getSignatureSnapshotData(request, oauthStage, token, tokenSecret, verifier)
     newFields.put(OAUTH_CONSUMER_KEY, """"${oauthConsumer.consumerKey}"""")
     newFields.put(OAUTH_NONCE, """"${signatureSnapshotData.nonce}"""")
@@ -96,42 +80,33 @@ class OauthAuthHeaderGenerator(
     newFields.put(OAUTH_SIGNATURE_METHOD, """"${OAUTH_SIGNATURE_METHOD_VALUE}"""")
     newFields.put(OAUTH_TIMESTAMP, """"${signatureSnapshotData.timeStamp}"""")
     newFields.put(OAUTH_VERSION, """"${OAUTH_VERSION_VALUE}"""")
-    return newFields
-  }
 
-  /**
-   * Only used when,
-   * RequestToken for fetching AccessTokens and
-   * AccessToken for authorizing resource requests.
-   *
-   * Cannot be used for fetching RequestToken
-   * since we have no tokens at that point.
-   */
-  private fun addTokenFieldSorted(token: String, fields: TreeMap<String, String>): TreeMap<String, String> {
-    val newFields = TreeMap<String, String>()
-    newFields.putAll(fields)
-    newFields.put(OAUTH_TOKEN, """"${token}"""")
-    return newFields
-  }
+    /**
+     * Only used when,
+     * RequestToken for fetching AccessTokens and
+     * AccessToken for authorizing resource requests.
+     *
+     * Cannot be used for fetching RequestToken
+     * since we have no tokens at that point.
+     */
+    if (oauthStage == OauthStage.GET_ACCESS_TOKEN || oauthStage == OauthStage.GET_RESOURCE) {
+      newFields.put(OAUTH_TOKEN, """"${token}"""")
+    }
 
-  /**
-   * Only used when fetching RequestToken
-   */
-  private fun addOauthCallbackFieldSorted(fields: TreeMap<String, String>): TreeMap<String, String> {
-    val newFields = TreeMap<String, String>()
-    newFields.putAll(fields)
-    newFields.put(OAUTH_CALLBACK, """"${ESCAPER.escape(oauthConsumer.callbackUrl)}"""")
-    return newFields
-  }
+    /**
+     * Only used when fetching RequestToken
+     */
+    if (oauthStage == OauthStage.GET_REQUEST_TOKEN) {
+      newFields.put(OAUTH_CALLBACK, """"${ESCAPER.escape(oauthConsumer.callbackUrl)}"""")
+    }
 
-  /**
-   * Only used when fetching AccessToken
-   */
-  private fun addOauthVerifierFieldSorted(verifier: String, fields: TreeMap<String, String>): TreeMap<String, String> {
-    val newFields = TreeMap<String, String>()
-    newFields.putAll(fields)
-    newFields.put(OAUTH_VERIFIER, """"${ESCAPER.escape(verifier)}"""")
-    // TODO: AccessToken request is failing with 401, might be verifier/token/tokenSecret??
+    /**
+     * Only used when fetching AccessToken
+     */
+    if (oauthStage == OauthStage.GET_ACCESS_TOKEN) {
+      newFields.put(OAUTH_VERIFIER, """"${ESCAPER.escape(verifier)}"""")
+    }
+
     return newFields
   }
 }
