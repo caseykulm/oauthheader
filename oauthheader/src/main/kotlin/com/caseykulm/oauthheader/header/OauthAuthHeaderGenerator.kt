@@ -9,12 +9,10 @@ import java.util.*
 class OauthAuthHeaderGenerator(
     val oauthConsumer: OauthConsumer,
     random: Random = SecureRandom(),
-    calendar: Calendar = Calendar.getInstance()) {
+    val calendar: Calendar = Calendar.getInstance()) {
   val nonceGenerator = NonceGenerator(random)
   val signatureGenerator = SignatureGenerator(
-      oauthConsumer,
-      calendar,
-      nonceGenerator)
+      oauthConsumer)
 
   private fun baseOauthStrBuilder() = StringBuilder("OAuth ")
 
@@ -22,7 +20,10 @@ class OauthAuthHeaderGenerator(
    * callback, no token, no secret, no verifier
    */
   fun getRequestTokenAuthHeaderValue(request: Request): String {
-    val oauthFieldsSorted = buildOauthFieldsSorted(request, OauthStage.GET_REQUEST_TOKEN)
+    val signatureSnapshotData2 = SignatureSnapshotData(calendar.utcTimeStamp(), nonceGenerator.generate())
+    val oauthFieldsSorted = buildOauthFieldsSorted(OauthStage.GET_REQUEST_TOKEN, signatureSnapshotData2)
+    val signature = signatureGenerator.getSignature(request, oauthFieldsSorted)
+    oauthFieldsSorted.put(OAUTH_SIGNATURE, ESCAPER.escape(signature))
     val oauthFieldsString = oauthTreeMapToString(oauthFieldsSorted)
     return baseOauthStrBuilder().append(oauthFieldsString).toString()
   }
@@ -35,7 +36,10 @@ class OauthAuthHeaderGenerator(
       verifier: String,
       requestToken: String,
       requestTokenSecret: String): String {
-    val oauthFieldsSorted = buildOauthFieldsSorted(request, OauthStage.GET_ACCESS_TOKEN, requestToken, requestTokenSecret, verifier)
+    val signatureSnapshotData2 = SignatureSnapshotData(calendar.utcTimeStamp(), nonceGenerator.generate())
+    val oauthFieldsSorted = buildOauthFieldsSorted(OauthStage.GET_ACCESS_TOKEN, signatureSnapshotData2, requestToken, verifier)
+    val signature = signatureGenerator.getSignature(request, oauthFieldsSorted, requestTokenSecret)
+    oauthFieldsSorted.put(OAUTH_SIGNATURE, ESCAPER.escape(signature))
     val oauthFieldsString = oauthTreeMapToString(oauthFieldsSorted)
     return baseOauthStrBuilder().append(oauthFieldsString).toString()
   }
@@ -47,7 +51,10 @@ class OauthAuthHeaderGenerator(
       request: Request,
       accessToken: String,
       accessTokenSecret: String): String {
-    val oauthFieldsSorted = buildOauthFieldsSorted(request, OauthStage.GET_RESOURCE, accessToken, accessTokenSecret)
+    val signatureSnapshotData = SignatureSnapshotData(calendar.utcTimeStamp(), nonceGenerator.generate())
+    val oauthFieldsSorted = buildOauthFieldsSorted(OauthStage.GET_RESOURCE, signatureSnapshotData, accessToken)
+    val signature = signatureGenerator.getSignature(request, oauthFieldsSorted, accessTokenSecret)
+    oauthFieldsSorted.put(OAUTH_SIGNATURE, ESCAPER.escape(signature))
     val oauthFieldsString = oauthTreeMapToString(oauthFieldsSorted)
     return baseOauthStrBuilder().append(oauthFieldsString).toString()
   }
@@ -59,7 +66,14 @@ class OauthAuthHeaderGenerator(
       if (!isFirst) {
         stringBuilder.append(", ")
       }
-      stringBuilder.append(entry.key).append("=").append(entry.value)
+
+      // e.g. oauth_version="1.0"
+      stringBuilder
+          .append(entry.key)
+          .append("=")
+          .append("\"")
+          .append(entry.value)
+          .append("\"")
 
       isFirst = false
     }
@@ -67,19 +81,16 @@ class OauthAuthHeaderGenerator(
   }
 
   private fun buildOauthFieldsSorted(
-      request: Request,
       oauthStage: OauthStage,
+      signatureSnapshotData: SignatureSnapshotData,
       token: String = "",
-      tokenSecret: String = "",
       verifier: String = ""): TreeMap<String, String> {
     val newFields = TreeMap<String, String>()
-    val signatureSnapshotData = signatureGenerator.getSignatureSnapshotData(request, oauthStage, token, tokenSecret, verifier)
-    newFields.put(OAUTH_CONSUMER_KEY, """"${oauthConsumer.consumerKey}"""")
-    newFields.put(OAUTH_NONCE, """"${signatureSnapshotData.nonce}"""")
-    newFields.put(OAUTH_SIGNATURE, """"${signatureSnapshotData.signatureEncoded}"""")
-    newFields.put(OAUTH_SIGNATURE_METHOD, """"${OAUTH_SIGNATURE_METHOD_VALUE}"""")
-    newFields.put(OAUTH_TIMESTAMP, """"${signatureSnapshotData.timeStamp}"""")
-    newFields.put(OAUTH_VERSION, """"${OAUTH_VERSION_VALUE}"""")
+    newFields.put(OAUTH_CONSUMER_KEY, oauthConsumer.consumerKey)
+    newFields.put(OAUTH_NONCE, signatureSnapshotData.nonce)
+    newFields.put(OAUTH_SIGNATURE_METHOD, OAUTH_SIGNATURE_METHOD_VALUE)
+    newFields.put(OAUTH_TIMESTAMP, signatureSnapshotData.timeStamp.toString())
+    newFields.put(OAUTH_VERSION, OAUTH_VERSION_VALUE)
 
     /**
      * Only used when,
@@ -90,21 +101,21 @@ class OauthAuthHeaderGenerator(
      * since we have no tokens at that point.
      */
     if (oauthStage == OauthStage.GET_ACCESS_TOKEN || oauthStage == OauthStage.GET_RESOURCE) {
-      newFields.put(OAUTH_TOKEN, """"${token}"""")
+      newFields.put(OAUTH_TOKEN, token)
     }
 
     /**
      * Only used when fetching RequestToken
      */
     if (oauthStage == OauthStage.GET_REQUEST_TOKEN) {
-      newFields.put(OAUTH_CALLBACK, """"${ESCAPER.escape(oauthConsumer.callbackUrl)}"""")
+      newFields.put(OAUTH_CALLBACK, ESCAPER.escape(oauthConsumer.callbackUrl))
     }
 
     /**
      * Only used when fetching AccessToken
      */
     if (oauthStage == OauthStage.GET_ACCESS_TOKEN) {
-      newFields.put(OAUTH_VERIFIER, """"${ESCAPER.escape(verifier)}"""")
+      newFields.put(OAUTH_VERIFIER, ESCAPER.escape(verifier))
     }
 
     return newFields
