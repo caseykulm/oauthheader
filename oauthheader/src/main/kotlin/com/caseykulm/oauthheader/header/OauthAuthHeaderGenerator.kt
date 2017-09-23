@@ -20,8 +20,8 @@ class OauthAuthHeaderGenerator(
    * callback, no token, no secret, no verifier
    */
   fun getRequestTokenAuthHeaderValue(request: Request): String {
-    val signatureSnapshotData2 = SignatureSnapshotData(calendar.utcTimeStamp(), nonceGenerator.generate())
-    val oauthFieldsSorted = buildOauthFieldsSorted(OauthStage.GET_REQUEST_TOKEN, signatureSnapshotData2)
+    val signatureSnapshotData = SignatureSnapshotData(calendar.utcTimeStamp(), nonceGenerator.generate())
+    val oauthFieldsSorted = buildOauthFieldsSorted(OauthStage.GET_REQUEST_TOKEN, signatureSnapshotData)
     val signature = signatureGenerator.getSignature(request, oauthFieldsSorted)
     oauthFieldsSorted.put(OAUTH_SIGNATURE, ESCAPER.escape(signature))
     val oauthFieldsString = oauthTreeMapToString(oauthFieldsSorted)
@@ -36,8 +36,8 @@ class OauthAuthHeaderGenerator(
       verifier: String,
       requestToken: String,
       requestTokenSecret: String): String {
-    val signatureSnapshotData2 = SignatureSnapshotData(calendar.utcTimeStamp(), nonceGenerator.generate())
-    val oauthFieldsSorted = buildOauthFieldsSorted(OauthStage.GET_ACCESS_TOKEN, signatureSnapshotData2, requestToken, verifier)
+    val signatureSnapshotData = SignatureSnapshotData(calendar.utcTimeStamp(), nonceGenerator.generate())
+    val oauthFieldsSorted = buildOauthFieldsSorted(OauthStage.GET_ACCESS_TOKEN, signatureSnapshotData, requestToken, verifier)
     val signature = signatureGenerator.getSignature(request, oauthFieldsSorted, requestTokenSecret)
     oauthFieldsSorted.put(OAUTH_SIGNATURE, ESCAPER.escape(signature))
     val oauthFieldsString = oauthTreeMapToString(oauthFieldsSorted)

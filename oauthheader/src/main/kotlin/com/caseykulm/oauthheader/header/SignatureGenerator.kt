@@ -1,7 +1,6 @@
 package com.caseykulm.oauthheader.header
 
 import com.caseykulm.oauthheader.models.OauthConsumer
-import com.caseykulm.oauthheader.models.OauthStage
 import com.google.common.net.UrlEscapers
 import okhttp3.Request
 import okio.Buffer

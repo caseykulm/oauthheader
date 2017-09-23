@@ -133,7 +133,7 @@ val signedResourceRequest = resourceRequest.newBuilder()
   .build()
 ```
 
-And now your good to send off an authenticated requests 🎉
+And now you're good to send off an authenticated requests 🎉
 
 ## Steps after Authenticating Once
 
