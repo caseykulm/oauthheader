@@ -1,31 +1,41 @@
-group 'com.caseykulm.oauthheader'
-version '0.2.7-SNAPSHOT'
-
 buildscript {
   ext.kotlin_version = '1.1.4'
 
   repositories {
+    jcenter()
     mavenCentral()
   }
+
   dependencies {
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
 
-apply plugin: 'kotlin'
+allprojects {
+  group 'com.caseykulm.oauthheader'
+  version "0.2.8-WATA-SNAPSHOT"
+
+  apply plugin: 'com.jfrog.bintray'
+  apply plugin: 'maven'
+
+  repositories {
+    mavenCentral()
+  }
+}
+
+subprojects {
+  apply plugin: 'kotlin'
+
+  compileKotlin {
+    kotlinOptions.jvmTarget = "1.6"
+  }
+  compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.6"
+  }
+}
+
+group 'com.caseykulm.oauthheader'
+version "0.2.8-WATA-SNAPSHOT"
+
 apply plugin: 'maven'
-
-repositories {
-  mavenCentral()
-}
-
-dependencies {
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-}
-
-compileKotlin {
-  kotlinOptions.jvmTarget = "1.6"
-}
-compileTestKotlin {
-  kotlinOptions.jvmTarget = "1.6"
-}
