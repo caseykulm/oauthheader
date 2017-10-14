@@ -1,8 +1,7 @@
 dependencies {
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-
   compile project(":oauthheader")
+  compile deps.kotlin
 
-  testCompile 'com.google.truth:truth:0.34'
-  testCompile 'junit:junit:4.12'
+  testCompile deps.truth
+  testCompile deps.junit
 }

@@ -1,5 +1,17 @@
 buildscript {
-  ext.kotlin_version = '1.1.4'
+  ext.isCi = Boolean.parseBoolean(System.getProperty('CI', 'false'))
+
+  ext.versions = [
+      'kotlin': '1.1.4'
+  ]
+
+  ext.deps = [
+      'kotlin': "org.jetbrains.kotlin:kotlin-stdlib-jre7:${versions.kotlin}",
+      'okhttp': 'com.squareup.okhttp3:okhttp:3.8.0',
+      'guavaAndroid': 'com.google.guava:guava:23.0-android',
+      'truth': 'com.google.truth:truth:0.34',
+      'junit': 'junit:junit:4.12'
+  ]
 
   repositories {
     jcenter()
@@ -8,24 +20,21 @@ buildscript {
 
   dependencies {
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
   }
 }
 
 allprojects {
   group 'com.caseykulm.oauthheader'
-  version "0.2.8-WATA-SNAPSHOT"
+  version "0.2.7-SNAPSHOT"
 
   apply plugin: 'com.jfrog.bintray'
   apply plugin: 'maven'
+  apply plugin: 'kotlin'
 
   repositories {
     mavenCentral()
   }
-}
-
-subprojects {
-  apply plugin: 'kotlin'
 
   compileKotlin {
     kotlinOptions.jvmTarget = "1.6"
@@ -34,8 +43,3 @@ subprojects {
     kotlinOptions.jvmTarget = "1.6"
   }
 }
-
-group 'com.caseykulm.oauthheader'
-version "0.2.8-WATA-SNAPSHOT"
-
-apply plugin: 'maven'

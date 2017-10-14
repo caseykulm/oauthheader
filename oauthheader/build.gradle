@@ -1,8 +1,8 @@
 dependencies {
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-
-  compile 'com.squareup.okhttp3:okhttp:3.8.0'
-  compile 'com.google.guava:guava:23.0-android'
-  testCompile 'com.google.truth:truth:0.34'
-  testCompile 'junit:junit:4.12'
+  compile deps.kotlin
+  compile deps.okhttp
+  compile deps.guavaAndroid
+  
+  testCompile deps.truth
+  testCompile deps.junit
 }
