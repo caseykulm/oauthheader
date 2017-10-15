@@ -13,6 +13,13 @@ buildscript {
       'junit': 'junit:junit:4.12'
   ]
 
+  ext.release = [
+      'groupId': 'com.caseykulm.oauthheader',
+      'version': '0.2.8-SNAPSHOT',
+      'description': 'OkHttp OAuth 1.0 3-legged Helper',
+      'githubRepo': 'https://github.com/caseykulm/oauthheader'
+  ]
+
   repositories {
     jcenter()
     mavenCentral()
@@ -25,10 +32,11 @@ buildscript {
 }
 
 allprojects {
-  group 'com.caseykulm.oauthheader'
-  version "0.2.7-SNAPSHOT"
+  group "${release.groupId}"
+  version "${release.version}"
 
   apply plugin: 'com.jfrog.bintray'
+  apply plugin: 'maven-publish'
   apply plugin: 'maven'
   apply plugin: 'kotlin'
 
@@ -41,5 +49,103 @@ allprojects {
   }
   compileTestKotlin {
     kotlinOptions.jvmTarget = "1.6"
+  }
+
+  // custom tasks for creating source/javadoc jars
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
+  // add javadoc/source jar tasks as artifacts
+  artifacts {
+    archives sourcesJar, javadocJar
+  }
+
+  afterEvaluate { project ->
+    // Create the pom configuration:
+    def pomConfig = {
+      licenses {
+        license {
+          name "The Apache Software License, Version 2.0"
+          url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+          distribution "repo"
+        }
+      }
+      developers {
+        developer {
+          id "caseykulm"
+          name "Casey Kulm"
+          email "mlukyesac@gmail.com"
+        }
+      }
+
+      scm {
+        url "${release.githubRepo}"
+      }
+    }
+
+    publishing {
+      publications {
+        MyPublication(MavenPublication) {
+          from components.java
+          artifact sourcesJar
+          artifact javadocJar
+          groupId "${release.groupId}"
+          artifactId "${project.name}"
+          version "${release.version}"
+          pom.withXml {
+            def root = asNode()
+            root.appendNode('description', "${release.description}")
+            root.appendNode('name', 'oauthheader')
+            root.appendNode('url', "${release.githubRepo}")
+            root.children().last() + pomConfig
+          }
+        }
+      }
+    }
+
+    bintray {
+      user = project.property("BINTRAY_USER")
+      key = project.property("BINTRAY_API_KEY")
+
+      dryRun = true     // Whether to run this as dry-run, without deploying
+      publish = true    // Whether version should be auto published after an upload
+      override = false  // Whether to override version artifacts already published
+
+      publications = ['MyPublication']
+      // - AND/OR -
+      filesSpec {
+        from 'build/libs'
+        into '.'
+      }
+
+      pkg {
+        repo = 'maven'
+        name = 'oauthheader'
+        userOrg = project.property("BINTRAY_USER")
+        desc = "${release.description}"
+        licenses = ['Apache-2.0']
+        websiteUrl = "${release.githubRepo}"
+        issueTrackerUrl = 'https://github.com/caseykulm/oauthheader/issues'
+        vcsUrl = 'https://github.com/caseykulm/oauthheader.git'
+        labels = ['oauth', 'kotlin', 'java']
+        publicDownloadNumbers = true
+        githubRepo = 'caseykulm/oauthheader'
+        githubReleaseNotesFile = 'README.md'
+        version {
+          name = "${release.version}"
+          desc = "${release.description}"
+          released  = new Date()
+          vcsTag = "${release.version}"
+        }
+      }
+    }
+
   }
 }
