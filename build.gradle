@@ -15,7 +15,7 @@ buildscript {
 
   ext.release = [
       'groupId': 'com.caseykulm.oauthheader',
-      'version': '0.2.8-SNAPSHOT',
+      'version': '0.2.8',
       'description': 'OkHttp OAuth 1.0 3-legged Helper',
       'githubRepo': 'https://github.com/caseykulm/oauthheader'
   ]
@@ -31,7 +31,7 @@ buildscript {
   }
 }
 
-subprojects { p ->
+subprojects {
   apply plugin: 'kotlin'
 
   repositories {
@@ -141,7 +141,7 @@ allprojects {
       user = project.property("BINTRAY_USER")
       key = project.property("BINTRAY_API_KEY")
 
-      dryRun = true     // Whether to run this as dry-run, without deploying
+      dryRun = false     // Whether to run this as dry-run, without deploying
       publish = true    // Whether version should be auto published after an upload
       override = false  // Whether to override version artifacts already published
 
@@ -170,6 +170,10 @@ allprojects {
           desc = "${release.description}"
           released  = new Date()
           vcsTag = "${release.version}"
+          gpg {
+            sign = true //Determines whether to GPG sign the files. The default is false
+            passphrase = project.property("BINTRAY_GPG_PASSWORD") //Optional. The passphrase for GPG signing'
+          }
         }
       }
     }
