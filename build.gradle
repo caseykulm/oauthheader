@@ -31,13 +31,7 @@ buildscript {
   }
 }
 
-allprojects {
-  group "${release.groupId}"
-  version "${release.version}"
-
-  apply plugin: 'com.jfrog.bintray'
-  apply plugin: 'maven-publish'
-  apply plugin: 'maven'
+subprojects { p ->
   apply plugin: 'kotlin'
 
   repositories {
@@ -50,26 +44,41 @@ allprojects {
   compileTestKotlin {
     kotlinOptions.jvmTarget = "1.6"
   }
+}
 
-  // custom tasks for creating source/javadoc jars
-  task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+allprojects {
+  def isParent = project.name.contains("parent")
+
+  group "${release.groupId}"
+  version "${release.version}"
+
+  apply plugin: 'com.jfrog.bintray'
+  apply plugin: 'maven-publish'
+  apply plugin: 'maven'
+
+  repositories {
+    mavenCentral()
   }
 
-  task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-  }
+  if (!isParent) {
+    // custom tasks for creating source/javadoc jars
+    task sourcesJar(type: Jar, dependsOn: classes) {
+      classifier = 'sources'
+      from sourceSets.main.allSource
+    }
 
-  // add javadoc/source jar tasks as artifacts
-  artifacts {
-    archives sourcesJar, javadocJar
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+      classifier = 'javadoc'
+      from javadoc.destinationDir
+    }
+
+    // add javadoc/source jar tasks as artifacts
+    artifacts {
+      archives sourcesJar, javadocJar
+    }
   }
 
   afterEvaluate { project ->
-    def isParent = project.name.contains("parent")
-
     // Create the pom configuration:
     def pomConfig = {
       licenses {
