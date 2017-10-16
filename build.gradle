@@ -68,6 +68,8 @@ allprojects {
   }
 
   afterEvaluate { project ->
+    def isParent = project.name.contains("parent")
+
     // Create the pom configuration:
     def pomConfig = {
       licenses {
@@ -77,6 +79,19 @@ allprojects {
           distribution "repo"
         }
       }
+
+      if (isParent) {
+        // only add modules field to parent
+        modules {
+          project.subprojects
+            .findAll { p ->
+              !p.name.contains("parent")
+            }.forEach { p ->
+              module "${p.name}"
+            }
+        }
+      }
+
       developers {
         developer {
           id "caseykulm"
@@ -93,9 +108,12 @@ allprojects {
     publishing {
       publications {
         MyPublication(MavenPublication) {
-          from components.java
-          artifact sourcesJar
-          artifact javadocJar
+          if (!isParent) {
+            // Only generate jar/sources/javadocs if not parent
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+          }
           groupId "${release.groupId}"
           artifactId "${project.name}"
           version "${release.version}"
@@ -146,6 +164,5 @@ allprojects {
         }
       }
     }
-
   }
 }
