@@ -1,6 +1,6 @@
 # OAuth Header
 
-https://img.shields.io/bintray/v/mlukyesac/maven/oauthheader.svg
+[![version](https://img.shields.io/bintray/v/mlukyesac/maven/oauthheader.svg)]
 
 An OkHttp helper for generating the four bits needed for 3 legged OAuth. 
 
