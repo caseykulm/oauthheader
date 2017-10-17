@@ -92,12 +92,7 @@ allprojects {
       if (isParent) {
         // only add modules field to parent
         modules {
-          project.subprojects
-            .findAll { p ->
-              !p.name.contains("parent")
-            }.forEach { p ->
-              module "${p.name}"
-            }
+          project.subprojects.forEach { module "${it.name}" }
         }
       }
 
