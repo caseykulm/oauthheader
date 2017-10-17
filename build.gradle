@@ -20,15 +20,25 @@ buildscript {
       'githubRepo': 'https://github.com/caseykulm/oauthheader',
       'secrets': [
           // Add secrets to System Environment Variables or Gradle Properties
-          'user':
-              System.env.BINTRAY_USER ?:
-              (project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : ''),
-          'key':
-              System.env.BINTRAY_API_KEY ?:
-              (project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : ''),
-          'gpgPassphrase':
-              System.env.BINTRAY_GPG_PASSWORD ?:
-              (project.hasProperty('BINTRAY_GPG_PASSWORD') ? project.property('BINTRAY_GPG_PASSWORD') : ''),
+          'bintray': [
+              'user':
+                  System.env.BINTRAY_USER ?:
+                      (project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : ''),
+              'key':
+                  System.env.BINTRAY_API_KEY ?:
+                      (project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : ''),
+              'gpgPassphrase':
+                  System.env.BINTRAY_GPG_PASSWORD ?:
+                      (project.hasProperty('BINTRAY_GPG_PASSWORD') ? project.property('BINTRAY_GPG_PASSWORD') : ''),
+          ],
+          'sonatype': [
+              'user':
+                  System.env.SONATYPE_USER ?:
+                      (project.hasProperty('SONATYPE_USER') ? project.property('SONATYPE_USER') : ''),
+              'password':
+                  System.env.SONATYPE_PASSWORD ?:
+                      (project.hasProperty('SONATYPE_PASSWORD') ? project.property('SONATYPE_PASSWORD') : ''),
+          ]
       ]
   ]
 
@@ -91,14 +101,20 @@ allprojects {
 
     task checkSecrets {
       doLast {
-        if (release.secrets.user.isEmpty()) {
+        if (release.secrets.bintray.user.isEmpty()) {
           throw new IllegalStateException('BINTRAY_USER must be defined in Environment Variable or Gradle Properties')
         }
-        if (release.secrets.key.isEmpty()) {
+        if (release.secrets.bintray.key.isEmpty()) {
           throw new IllegalStateException('BINTRAY_API_KEY must be defined in Environment Variable or Gradle Properties')
         }
-        if (release.secrets.gpgPassphrase.isEmpty()) {
+        if (release.secrets.bintray.gpgPassphrase.isEmpty()) {
           throw new IllegalStateException('BINTRAY_GPG_PASSWORD must be defined in Environment Variable or Gradle Properties')
+        }
+        if (release.secrets.sonatype.user.isEmpty()) {
+          throw new IllegalStateException('SONATYPE_USER must be defined in Environment Variable or Gradle Properties')
+        }
+        if (release.secrets.sonatype.password.isEmpty()) {
+          throw new IllegalStateException('SONATYPE_PASSWORD must be defined in Environment Variable or Gradle Properties')
         }
       }
     }
@@ -161,12 +177,12 @@ allprojects {
     }
 
     bintray {
-      user = release.secrets.user
-      key = release.secrets.key
+      user = release.secrets.bintray.user
+      key = release.secrets.bintray.key
 
       dryRun = false     // Whether to run this as dry-run, without deploying
       publish = true    // Whether version should be auto published after an upload
-      override = false  // Whether to override version artifacts already published
+      override = false // Whether to override version artifacts already published
 
       publications = ['MyPublication']
       // - AND/OR -
@@ -178,7 +194,7 @@ allprojects {
       pkg {
         repo = 'maven'
         name = 'oauthheader'
-        userOrg = release.secrets.user
+        userOrg = release.secrets.bintray.user
         desc = "${release.description}"
         licenses = ['Apache-2.0']
         websiteUrl = "${release.githubRepo}"
@@ -195,7 +211,13 @@ allprojects {
           vcsTag = "${release.version}"
           gpg {
             sign = true //Determines whether to GPG sign the files. The default is false
-            passphrase = release.secrets.gpgPassphrase //Optional. The passphrase for GPG signing'
+            passphrase = release.secrets.bintray.gpgPassphrase //Optional. The passphrase for GPG signing'
+          }
+          mavenCentralSync {
+            sync = true
+            user = release.secrets.sonatype.user //OSS user token: mandatory
+            password = release.secrets.sonatype.password //OSS user password: mandatory
+            close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
           }
         }
       }
