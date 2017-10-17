@@ -17,7 +17,19 @@ buildscript {
       'groupId': 'com.caseykulm.oauthheader',
       'version': '0.2.8',
       'description': 'OkHttp OAuth 1.0 3-legged Helper',
-      'githubRepo': 'https://github.com/caseykulm/oauthheader'
+      'githubRepo': 'https://github.com/caseykulm/oauthheader',
+      'secrets': [
+          // Add secrets to System Environment Variables or Gradle Properties
+          'user':
+              System.env.BINTRAY_USER ?:
+              (project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : ''),
+          'key':
+              System.env.BINTRAY_API_KEY ?:
+              (project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : ''),
+          'gpgPassphrase':
+              System.env.BINTRAY_GPG_PASSWORD ?:
+              (project.hasProperty('BINTRAY_GPG_PASSWORD') ? project.property('BINTRAY_GPG_PASSWORD') : ''),
+      ]
   ]
 
   repositories {
@@ -76,6 +88,22 @@ allprojects {
     artifacts {
       archives sourcesJar, javadocJar
     }
+
+    task checkSecrets {
+      doLast {
+        if (release.secrets.user.isEmpty()) {
+          throw new IllegalStateException('BINTRAY_USER must be defined in Environment Variable or Gradle Properties')
+        }
+        if (release.secrets.key.isEmpty()) {
+          throw new IllegalStateException('BINTRAY_API_KEY must be defined in Environment Variable or Gradle Properties')
+        }
+        if (release.secrets.gpgPassphrase.isEmpty()) {
+          throw new IllegalStateException('BINTRAY_GPG_PASSWORD must be defined in Environment Variable or Gradle Properties')
+        }
+      }
+    }
+
+    bintrayUpload.dependsOn("checkSecrets")
   }
 
   afterEvaluate { project ->
@@ -133,8 +161,8 @@ allprojects {
     }
 
     bintray {
-      user = project.property("BINTRAY_USER")
-      key = project.property("BINTRAY_API_KEY")
+      user = release.secrets.user
+      key = release.secrets.key
 
       dryRun = false     // Whether to run this as dry-run, without deploying
       publish = true    // Whether version should be auto published after an upload
@@ -150,7 +178,7 @@ allprojects {
       pkg {
         repo = 'maven'
         name = 'oauthheader'
-        userOrg = project.property("BINTRAY_USER")
+        userOrg = release.secrets.user
         desc = "${release.description}"
         licenses = ['Apache-2.0']
         websiteUrl = "${release.githubRepo}"
@@ -167,7 +195,7 @@ allprojects {
           vcsTag = "${release.version}"
           gpg {
             sign = true //Determines whether to GPG sign the files. The default is false
-            passphrase = project.property("BINTRAY_GPG_PASSWORD") //Optional. The passphrase for GPG signing'
+            passphrase = release.secrets.gpgPassphrase //Optional. The passphrase for GPG signing'
           }
         }
       }
