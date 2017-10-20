@@ -1,6 +1,6 @@
 # OAuth Header
 
-![version](https://img.shields.io/bintray/v/mlukyesac/maven/oauthheader.svg)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.caseykulm.oauthheader/oauthheader-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.caseykulm.oauthheader/oauthheader-parent)
 
 An OkHttp helper for generating the four bits needed for 3 legged OAuth. 
 
@@ -8,6 +8,33 @@ An OkHttp helper for generating the four bits needed for 3 legged OAuth.
 2. Authorize
 3. Access Token
 4. Resource Request Signing oauthheader 
+
+## Download 
+
+With Gradle:
+
+```groovy
+dependencies {
+  compile 'com.caseykulm.oauthheader:oauthheader:0.2.8'
+  compile 'com.caseykulm.oauthheader:oauthheader-parent:0.2.8' 
+}
+```
+
+With Maven: 
+
+```xml
+<dependency>
+  <groupId>com.caseykulm.oauthheader</groupId>
+  <artifactId>oauthheader</artifactId>
+  <version>0.2.8</version>
+</dependency>
+<dependency>
+  <groupId>com.caseykulm.oauthheader</groupId>
+  <artifactId>oauthheader-services</artifactId>
+  <version>0.2.8</version>
+</dependency>
+
+```
 
 ## Steps from scratch
 
