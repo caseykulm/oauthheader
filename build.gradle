@@ -16,7 +16,7 @@ buildscript {
 
   ext.release = [
       'groupId': 'com.caseykulm.oauthheader',
-      'version': '0.3.0',
+      'version': '0.3.1',
       'description': 'OkHttp OAuth 1.0 3-legged Helper',
       'githubRepo': 'https://github.com/caseykulm/oauthheader',
       'secrets': [
