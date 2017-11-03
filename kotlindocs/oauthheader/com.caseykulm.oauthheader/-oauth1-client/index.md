@@ -8,7 +8,7 @@
 
 | Name | Summary |
 |---|---|
-| [&lt;init&gt;](-init-.md) | `Oauth1Client(oauthConsumer: `[`OauthConsumer`](../../com.caseykulm.oauthheader.models/-oauth-consumer/index.md)`, oauthService: `[`OauthService`](../../com.caseykulm.oauthheader.models/-oauth-service/index.md)`, okHttpClient: OkHttpClient)` |
+| [&lt;init&gt;](-init-.md) | `Oauth1Client(oauthConsumer: `[`OauthConsumer`](../../com.caseykulm.oauthheader.models/-oauth-consumer/index.md)`, oauthService: `[`OauthService`](../../com.caseykulm.oauthheader.models/-oauth-service/index.md)`, okHttpClient: OkHttpClient = OkHttpClient())` |
 
 ### Functions
 
