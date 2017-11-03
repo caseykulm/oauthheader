@@ -130,6 +130,15 @@ allprojects {
       }
     }
 
+    task updateReadmeVersion {
+      doLast {
+        def readmeFileString = new File('README.md').getText('UTF-8')                         // Read file
+        def updatedString = readmeFileString.replaceAll(/\d+.\d+.\d+/, "${release.version}")  // replace versions
+        new File('README.md').write(updatedString, 'UTF-8')                                   // Write file
+      }
+    }
+
+    build.dependsOn("updateReadmeVersion")
     bintrayUpload.dependsOn("checkSecrets")
   }
 

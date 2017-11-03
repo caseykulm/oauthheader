@@ -15,8 +15,8 @@ With Gradle:
 
 ```groovy
 dependencies {
-  compile 'com.caseykulm.oauthheader:oauthheader:0.3.0'
-  compile 'com.caseykulm.oauthheader:oauthheader-parent:0.3.0' 
+  compile 'com.caseykulm.oauthheader:oauthheader:0.3.1'
+  compile 'com.caseykulm.oauthheader:oauthheader-parent:0.3.1' 
 }
 ```
 
@@ -26,12 +26,12 @@ With Maven:
 <dependency>
   <groupId>com.caseykulm.oauthheader</groupId>
   <artifactId>oauthheader</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
 </dependency>
 <dependency>
   <groupId>com.caseykulm.oauthheader</groupId>
   <artifactId>oauthheader-services</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
 </dependency>
 
 ```
