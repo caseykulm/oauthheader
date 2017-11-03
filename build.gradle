@@ -72,8 +72,8 @@ subprojects { project ->
 
   dokka {
     moduleName = "${project.name}"
-    outputFormat = 'html'
-    outputDirectory = "${project.buildDir}/javadoc"
+    outputFormat = 'gfm'
+    outputDirectory = "${project.rootProject.rootDir}/kotlindocs"
 
     jdkVersion = 6 // Used for linking to JDK
   }
