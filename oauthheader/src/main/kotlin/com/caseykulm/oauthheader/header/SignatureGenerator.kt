@@ -11,10 +11,10 @@ import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-val ESCAPER = UrlEscapers.urlFormParameterEscaper()
+internal val ESCAPER = UrlEscapers.urlFormParameterEscaper()
 
-class SignatureGenerator(
-    val oauthConsumer: OauthConsumer) {
+internal class SignatureGenerator(
+    private val oauthConsumer: OauthConsumer) {
   internal fun getSignature(request: Request, oauthParams: TreeMap<String, String>, tokenSecret: String = ""): String {
     return getSignature(getSigningKey(tokenSecret), getBaseString(request, oauthParams))
   }
@@ -148,5 +148,3 @@ class SignatureGenerator(
     return "${escapedConsumerSecret}&${escapedAccessSigningSecret}"
   }
 }
-
-data class SignatureSnapshotData(val timeStamp: Long, val nonce: String)

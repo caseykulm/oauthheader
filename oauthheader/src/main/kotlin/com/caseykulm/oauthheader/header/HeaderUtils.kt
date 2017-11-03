@@ -6,20 +6,20 @@ import okhttp3.Request
 import java.util.*
 import kotlin.collections.HashMap
 
-val OAUTH_CONSUMER_KEY = "oauth_consumer_key"
-val OAUTH_TOKEN = "oauth_token"
-val OAUTH_TIMESTAMP = "oauth_timestamp"
-val OAUTH_NONCE = "oauth_nonce"
-val OAUTH_SIGNATURE = "oauth_signature"
-val OAUTH_SIGNATURE_METHOD = "oauth_signature_method"
-val OAUTH_VERSION = "oauth_version"
-val OAUTH_CALLBACK = "oauth_callback"
-val OAUTH_VERIFIER = "oauth_verifier"
+internal val OAUTH_CONSUMER_KEY = "oauth_consumer_key"
+internal val OAUTH_TOKEN = "oauth_token"
+internal val OAUTH_TIMESTAMP = "oauth_timestamp"
+internal val OAUTH_NONCE = "oauth_nonce"
+internal val OAUTH_SIGNATURE = "oauth_signature"
+internal val OAUTH_SIGNATURE_METHOD = "oauth_signature_method"
+internal val OAUTH_VERSION = "oauth_version"
+internal val OAUTH_CALLBACK = "oauth_callback"
+internal val OAUTH_VERIFIER = "oauth_verifier"
 
-val OAUTH_SIGNATURE_METHOD_VALUE = "HMAC-SHA1"
-val OAUTH_VERSION_VALUE = "1.0"
+internal val OAUTH_SIGNATURE_METHOD_VALUE = "HMAC-SHA1"
+internal val OAUTH_VERSION_VALUE = "1.0"
 
-fun Calendar.utcTimeStamp(): Long {
+internal fun Calendar.utcTimeStamp(): Long {
   timeZone = TimeZone.getTimeZone("UTC")
   return timeInMillis / 1000
 }
@@ -27,11 +27,11 @@ fun Calendar.utcTimeStamp(): Long {
 /**
  * returns the url only up to the path, i.e. no query params
  */
-fun Request.urlToPath(): String {
+internal fun Request.urlToPath(): String {
   return url().newBuilder().query(null).build().toString()
 }
 
-fun toRequestTokenResponse(responseStr: String): RequestTokenResponse {
+internal fun toRequestTokenResponse(responseStr: String): RequestTokenResponse {
   if (!responseStr.contains("oauth_token")) {
     throw IllegalStateException("oauth_token cannot be parsed from: " + responseStr)
   } else if (!responseStr.contains("oauth_token_secret")) {
@@ -54,7 +54,7 @@ fun toRequestTokenResponse(responseStr: String): RequestTokenResponse {
   return requestTokenResponse
 }
 
-fun toAccessTokenResponse(responseStr: String): AccessTokenResponse {
+internal fun toAccessTokenResponse(responseStr: String): AccessTokenResponse {
   if (!responseStr.contains("oauth_token")) {
     throw IllegalStateException("oauth_token cannot be parsed from: " + responseStr)
   } else if (!responseStr.contains("oauth_token_secret")) {

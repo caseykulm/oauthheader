@@ -6,12 +6,14 @@ import okhttp3.Request
 import java.security.SecureRandom
 import java.util.*
 
-class OauthAuthHeaderGenerator(
+internal data class SignatureSnapshotData(val timeStamp: Long, val nonce: String)
+
+internal class OauthAuthHeaderGenerator(
     val oauthConsumer: OauthConsumer,
     random: Random = SecureRandom(),
     val calendar: Calendar = Calendar.getInstance()) {
-  val nonceGenerator = NonceGenerator(random)
-  val signatureGenerator = SignatureGenerator(
+  private val nonceGenerator = NonceGenerator(random)
+  private val signatureGenerator = SignatureGenerator(
       oauthConsumer)
 
   private fun baseOauthStrBuilder() = StringBuilder("OAuth ")

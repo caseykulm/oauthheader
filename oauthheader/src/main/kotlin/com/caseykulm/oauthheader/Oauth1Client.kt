@@ -10,22 +10,34 @@ import okhttp3.OkHttpClient
 
 import okhttp3.*
 
-class Oauth1Client(
-    val oauthConsumer: OauthConsumer,
-    val oauthService: OauthService,
-    val okHttpClient: OkHttpClient): Oauth1Api {
-  companion object {
-    val AUTH_HEADER_KEY = "Authorization"
-  }
+internal val AUTH_HEADER_KEY = "Authorization"
 
-  override fun getRequestToken(): RequestTokenResponse {
+class Oauth1Client(
+    private val oauthConsumer: OauthConsumer,
+    private val oauthService: OauthService,
+    private val okHttpClient: OkHttpClient) {
+
+  // region Public API
+
+  /**
+   * Step 1: Retrieve Temporary Request Token Credential
+   *
+   * NOTE: This is blocking work, and should be performed on a worker thread.
+   */
+  fun getRequestToken(): RequestTokenResponse {
     val requestTokenBodyString = getTokenResponseBodyString(
         OauthStage.GET_REQUEST_TOKEN,
         getPremadeRequest(oauthService.requestTokenUrl))
     return toRequestTokenResponse(requestTokenBodyString)
   }
 
-  override fun getAuthorizationUrl(requestTokenResponse: RequestTokenResponse): String {
+  /**
+   * Step 2: Retrieve an Authorizaiton URL to send the user to
+   *
+   * Uses the RequestTokenResponse to form the Authorization URL. This is the URL you send your
+   * user to, for them to give your App permissions.
+   */
+  fun getAuthorizationUrl(requestTokenResponse: RequestTokenResponse): String {
     val authorizationUrl = HttpUrl.parse(oauthService.authorizeUrl)
     if (authorizationUrl == null) throw IllegalStateException("Failed to parse authorize url")
     val authorizationUrlAuthed = authorizationUrl.newBuilder()
@@ -34,7 +46,12 @@ class Oauth1Client(
     return authorizationUrlAuthed.toString()
   }
 
-  override fun parseVerificationResponse(rawQuery: String): AuthorizationResponse {
+  /**
+   * Step 3: Parse the intercepted Authorization Response
+   *
+   * This will be used as input for the next step.
+   */
+  fun parseVerificationResponse(rawQuery: String): AuthorizationResponse {
     if (!rawQuery.contains("oauth_token")) {
       throw IllegalStateException("oauth_token cannot be parsed from: " + rawQuery)
     } else if (!rawQuery.contains("oauth_verifier")) {
@@ -56,7 +73,18 @@ class Oauth1Client(
     return authorizationResponse
   }
 
-  override fun getAccessToken(
+  /**
+   * Step 4: Retrieve Long Lasting Access Token Credential
+   *
+   * Retrieves an Access Token from the OAuth Service, and returns the token
+   * to be stored securely. This is the Token you will sign every request with.
+   * Assume that at some point in the future you will receive a 401 unauthorized
+   * exception using this access token, in which case you should take them
+   * back to the Authorization URL to grant your App permissions again.
+   *
+   * NOTE: This is blocking work, and should be performed on a worker thread.
+   */
+  fun getAccessToken(
       requestTokenResponse: RequestTokenResponse,
       authorizationResponse: AuthorizationResponse): AccessTokenResponse {
     val requestTokenBodyString = getTokenResponseBodyString(
@@ -67,6 +95,10 @@ class Oauth1Client(
         authorizationResponse.oauthVerifier)
     return toAccessTokenResponse(requestTokenBodyString)
   }
+
+  // endregion
+
+  // region Internal API
 
   private fun getAuthHeaderValue(
       oauthStage: OauthStage,
@@ -122,7 +154,7 @@ class Oauth1Client(
     return tokenResponseBody.string()
   }
 
-  override fun getSignedResourceAuthHeader(
+  internal fun getSignedResourceAuthHeader(
       request: Request,
       accessTokenResponse: AccessTokenResponse): String {
     return getAuthHeaderValue(
@@ -131,4 +163,6 @@ class Oauth1Client(
         accessTokenResponse.oauthToken,
         accessTokenResponse.oauthTokenSecret)
   }
+
+  // endregion
 }

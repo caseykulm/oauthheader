@@ -1,11 +1,9 @@
 package com.caseykulm.oauthheader.services
 
-import com.caseykulm.oauthheader.Oauth1Api
 import com.caseykulm.oauthheader.Oauth1Client
 import com.caseykulm.oauthheader.models.OauthConsumer
 import okhttp3.OkHttpClient
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 class TwitterOauthServiceTest {
@@ -15,7 +13,7 @@ class TwitterOauthServiceTest {
       "YOUR_CALLBACK")
   val oauthService = TwitterOauthService()
   val okhttpClient = OkHttpClient.Builder().build()
-  lateinit var oauthClient: Oauth1Api
+  lateinit var oauthClient: Oauth1Client
 
   @Before
   fun setUp() {
