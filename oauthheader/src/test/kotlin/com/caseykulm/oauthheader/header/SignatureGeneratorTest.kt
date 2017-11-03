@@ -10,7 +10,7 @@ import org.junit.Test
 import java.util.*
 
 class SignatureGeneratorTest {
-  lateinit var siggyGen: SignatureGenerator
+  private lateinit var siggyGen: SignatureGenerator
   val accessToken = "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb"
   val accessSecret = "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE"
 

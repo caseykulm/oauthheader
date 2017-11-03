@@ -11,7 +11,7 @@ import org.junit.Test
 import java.util.*
 
 class OauthAuthHeaderGeneratorTest {
-  lateinit var oauthAuthHeaderGenerator: OauthAuthHeaderGenerator
+  private lateinit var oauthAuthHeaderGenerator: OauthAuthHeaderGenerator
   val accessToken = "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb"
   val accessSecret = "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE"
 

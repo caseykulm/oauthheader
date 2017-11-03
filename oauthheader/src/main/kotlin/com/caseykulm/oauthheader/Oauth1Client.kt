@@ -15,7 +15,7 @@ internal val AUTH_HEADER_KEY = "Authorization"
 class Oauth1Client(
     private val oauthConsumer: OauthConsumer,
     private val oauthService: OauthService,
-    private val okHttpClient: OkHttpClient) {
+    private val okHttpClient: OkHttpClient = OkHttpClient()) {
 
   // region Public API
 
