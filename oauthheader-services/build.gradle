@@ -1,7 +1,8 @@
 dependencies {
-  compile project(":oauthheader")
-  compile deps.kotlin
+  implementation project(":oauthheader")
+  implementation deps.okhttp
+  compileOnly deps.kotlin
 
-  testCompile deps.truth
-  testCompile deps.junit
+  testImplementation deps.truth
+  testImplementation deps.junit
 }

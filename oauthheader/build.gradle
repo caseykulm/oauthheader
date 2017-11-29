@@ -1,8 +1,8 @@
 dependencies {
-  compile deps.kotlin
-  compile deps.okhttp
-  compile deps.guavaAndroid
+  implementation deps.kotlin
+  implementation deps.okhttp
+  implementation deps.guavaAndroid
   
-  testCompile deps.truth
-  testCompile deps.junit
+  testImplementation deps.truth
+  testImplementation deps.junit
 }
