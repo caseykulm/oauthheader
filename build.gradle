@@ -3,7 +3,8 @@ buildscript {
 
   ext.versions = [
       'kotlin': '1.2.30',
-      'dokka': '0.9.15'
+      'dokka': '0.9.15',
+      'bintray': '1.8.0'
   ]
 
   ext.deps = [
@@ -49,7 +50,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${versions.bintray}"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
     classpath "org.jetbrains.dokka:dokka-gradle-plugin:${versions.dokka}"
   }
@@ -140,6 +141,9 @@ allprojects {
 
     build.dependsOn("updateReadmeVersion")
     bintrayUpload.dependsOn("checkSecrets")
+
+    // This might not be necessary, but it doesn't seem to be generating the root pom.xml without this
+    // bintrayUpload.dependsOn("publish")
   }
 
   afterEvaluate { project ->
