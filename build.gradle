@@ -2,12 +2,12 @@ buildscript {
   ext.isCi = Boolean.parseBoolean(System.getProperty('CI', 'false'))
 
   ext.versions = [
-      'kotlin': '1.1.4',
+      'kotlin': '1.2.30',
       'dokka': '0.9.15'
   ]
 
   ext.deps = [
-      'kotlin': "org.jetbrains.kotlin:kotlin-stdlib-jre7:${versions.kotlin}",
+      'kotlin': "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${versions.kotlin}",
       'okhttp': 'com.squareup.okhttp3:okhttp:3.8.0',
       'guavaAndroid': 'com.google.guava:guava:23.0-android',
       'truth': 'com.google.truth:truth:0.34',
@@ -16,7 +16,7 @@ buildscript {
 
   ext.release = [
       'groupId': 'com.caseykulm.oauthheader',
-      'version': '0.3.1',
+      'version': '0.4.0',
       'description': 'OkHttp OAuth 1.0 3-legged Helper',
       'githubRepo': 'https://github.com/caseykulm/oauthheader',
       'secrets': [
