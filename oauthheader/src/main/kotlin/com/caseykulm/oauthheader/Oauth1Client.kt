@@ -130,7 +130,7 @@ class Oauth1Client(
    * actual resource.
    */
   private fun getPremadeRequest(tokenUrl: String): Request {
-    val tokenHttpUrl = HttpUrl.parse(tokenUrl)
+    val tokenHttpUrl = HttpUrl.parse(tokenUrl)!!
     val tokenOkRequest = Request.Builder()
         .url(tokenHttpUrl)
         .post(FormBody.Builder().build())

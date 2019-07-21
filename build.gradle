@@ -1,14 +1,8 @@
 buildscript {
   ext.isCi = Boolean.parseBoolean(System.getProperty('CI', 'false'))
 
-  ext.versions = [
-      'kotlin': '1.2.30',
-      'dokka': '0.9.15',
-      'bintray': '1.8.0'
-  ]
-
   ext.deps = [
-      'kotlin': "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${versions.kotlin}",
+      'kotlin': "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.41",
       'okhttp': 'com.squareup.okhttp3:okhttp:3.8.0',
       'guavaAndroid': 'com.google.guava:guava:23.0-android',
       'truth': 'com.google.truth:truth:0.34',
@@ -50,9 +44,9 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${versions.bintray}"
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
-    classpath "org.jetbrains.dokka:dokka-gradle-plugin:${versions.dokka}"
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.41"
+    classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.15"
   }
 }
 
@@ -65,10 +59,10 @@ subprojects { project ->
   }
 
   compileKotlin {
-    kotlinOptions.jvmTarget = "1.6"
+    kotlinOptions.jvmTarget = "1.8"
   }
   compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.6"
+    kotlinOptions.jvmTarget = "1.8"
   }
 
   dokka {
@@ -76,7 +70,7 @@ subprojects { project ->
     outputFormat = 'gfm'
     outputDirectory = "${project.rootProject.rootDir}/kotlindocs"
 
-    jdkVersion = 6 // Used for linking to JDK
+    jdkVersion = 8 // Used for linking to JDK
   }
 }
 

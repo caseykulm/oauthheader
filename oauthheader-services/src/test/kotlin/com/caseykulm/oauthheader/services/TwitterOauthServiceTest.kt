@@ -7,13 +7,14 @@ import org.junit.Before
 import org.junit.Test
 
 class TwitterOauthServiceTest {
-  val oauthConsumer = OauthConsumer(
+  private val oauthConsumer = OauthConsumer(
       "YOUR_TWITTER_CONSUMER_KEY",
       "YOUR_TWITTER_CONSUMER_SECRET",
-      "YOUR_CALLBACK")
-  val oauthService = TwitterOauthService()
-  val okhttpClient = OkHttpClient.Builder().build()
-  lateinit var oauthClient: Oauth1Client
+      "YOUR_CALLBACK"
+  )
+  private val oauthService = TwitterOauthService()
+  private val okhttpClient = OkHttpClient.Builder().build()
+  private lateinit var oauthClient: Oauth1Client
 
   @Before
   fun setUp() {

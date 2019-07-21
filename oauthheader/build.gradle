@@ -1,8 +1,8 @@
 dependencies {
-  implementation deps.kotlin
-  implementation deps.okhttp
   implementation deps.guavaAndroid
-  
-  testImplementation deps.truth
+  api deps.kotlin
+  implementation deps.okhttp
+
   testImplementation deps.junit
+  testImplementation deps.truth
 }
