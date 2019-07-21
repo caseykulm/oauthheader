@@ -7,13 +7,14 @@ import org.junit.Before
 import org.junit.Test
 
 class RavelryOauthServiceTest {
-  val oauthConsumer = OauthConsumer(
+  private val oauthConsumer = OauthConsumer(
       "YOUR_RAVELRY_CONSUMER_KEY",
       "YOUR_RAVELRY_CONSUMER_SECRET",
-      "YOUR_CALLBACK")
-  val oauthService = RavelryOauthService()
-  val okhttpClient = OkHttpClient.Builder().build()
-  lateinit var oauthClient: Oauth1Client
+      "YOUR_CALLBACK"
+  )
+  private val oauthService = RavelryOauthService()
+  private val okhttpClient = OkHttpClient.Builder().build()
+  private lateinit var oauthClient: Oauth1Client
 
   @Before
   fun setUp() {
