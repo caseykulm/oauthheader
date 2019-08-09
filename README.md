@@ -15,25 +15,8 @@ With Gradle:
 
 ```groovy
 dependencies {
-  compile 'com.caseykulm.oauthheader:oauthheader:0.4.0'
-  compile 'com.caseykulm.oauthheader:oauthheader-parent:0.4.0' 
+  implementation 'com.caseykulm.oauthheader:oauthheader:0.5.0'
 }
-```
-
-With Maven: 
-
-```xml
-<dependency>
-  <groupId>com.caseykulm.oauthheader</groupId>
-  <artifactId>oauthheader</artifactId>
-  <version>0.4.0</version>
-</dependency>
-<dependency>
-  <groupId>com.caseykulm.oauthheader</groupId>
-  <artifactId>oauthheader-services</artifactId>
-  <version>0.4.0</version>
-</dependency>
-
 ```
 
 ## Steps from scratch
@@ -48,7 +31,8 @@ Token to.
 val oauthConsumer = OauthConsumer(
   "YOUR_CONSUMER_KEY", 
   "YOUR_CONSUMER_SECRET", 
-  "YOUR_CONSUMER_CALLBACK")
+  "YOUR_CONSUMER_CALLBACK"
+)
 ```
 
 Define the 3 OAuth endpoints from the Service, or use one of the predefined 
@@ -58,7 +42,8 @@ OauthService objects from the oauthheader-services artifact.
 val oauthService = OauthService(
   "SERVICE_REQUEST_TOKEN_URL", 
   "SERVICE_AUTHORIZE_URL", 
-  "SERVICE_ACCESS_TOKEN_URL")
+  "SERVICE_ACCESS_TOKEN_URL"
+)
 ```
 
 Create an Oauth1Api instance with the Oauth1Client class.
@@ -67,7 +52,8 @@ Create an Oauth1Api instance with the Oauth1Client class.
 val oauthClient = Oauth1Client(
   oauthConsumer, 
   oauthService, 
-  okhttpClient)
+  okhttpClient
+)
 ```
 
 ### Step 1: Get a Request Token
@@ -109,7 +95,8 @@ Now you can get an access token.
 
 ```kotlin
 val accessTokenResponse: AccessTokenResponse = oauthClient.getAccessToken(
-  requestTokenResponse, authorizationResponse)
+  requestTokenResponse, authorizationResponse
+)
 ```
 
 ### Step 5: Getting a Signed Resource Request Header 
@@ -150,7 +137,8 @@ the stuff we've acquired so far.
 
 ```kotlin
 val signedHeaderValue: String = oauthClient.getSignedResourceAuthHeader(
-  resourceRequest, authorizationResponse, accessTokenResponse)
+  resourceRequest, authorizationResponse, accessTokenResponse
+)
 ```
 
 Add it to your resource request, also using the provided constant for 
